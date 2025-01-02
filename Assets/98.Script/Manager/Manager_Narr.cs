@@ -7,8 +7,7 @@ public class Manager_Narr : MonoBehaviour
     //Common
     public int Content_Seq = 0;
 
-
-    public GameObject Audio_Narration;
+    private AudioSource Audio;
 
     [Header("[ COMPONENT CHECK ]")]
     public AudioClip[] Audio_Narration_array;
@@ -16,73 +15,25 @@ public class Manager_Narr : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        Audio = GetComponent<AudioSource>();
     }
 
     //어떤식으로 불러올지는 기존 시스템 참고해서 저장
+    //일단 일시적으로 inspector 창에서 바로 활용하는 것으로 구현하였음
     void Init_Audio_narr()
     {
-        
+
     }
 
-    public void Change_Audio_narr()
+    public void Change_Audio_narr(int Number_seq)
     {
-        
-    }
 
-    /*
-     *  void Start()
-    {
-        Audio = GetComponent<AudioSource>();
-        Audio.clip = AudioFiles[0];
-        Audio.PlayDelayed(FirstNarrationDelay);
-        NarrationEnd = Manager_audio.instance.Narration_End;
-        NextBtn = GameObject.Find("NextEffect");
-        NarrationEnd.PlayDelayed(Audio.clip.length + FirstNarrationDelay);
-        Invoke("NextBtnEffect", Audio.clip.length + FirstNarrationDelay);
-        Invoke("NextBtnEffect", 5f); //중간 평가용으로 수정, 이 부분이 다음 효과
-    }
+        Content_Seq = Number_seq;
+        //if (Content_Seq != 0)
+        //{
 
-    // Update is called once per frame
-    void Update()
-    {
-        PlayNarrationWithCount();
+        //}
+        Audio.clip = Audio_Narration_array[Content_Seq];
+        Audio.Play();
     }
-    void PlayNarrationWithCount()//When NextButton Pressed, Trigger Narration and Effect
-    {
-        BtnCount = gameObject.GetComponent<Script_controller>().btnCount;
-        if (AudioFiles.Length > BtnCount)
-        {
-            if (PostCount != BtnCount)
-            {
-                EffectReset();
-                Audio.clip = AudioFiles[BtnCount];
-                if(Audio.clip!=null)
-                {
-                    Audio.PlayDelayed(1f);
-
-                    NarrationEnd.PlayDelayed(Audio.clip.length + 1f);
-                    Invoke("NextBtnEffect", Audio.clip.length + 1f);
-                    Prev_Status = true;
-
-                }
-            }
-        }
-        PostCount = BtnCount;
-    }
-    public void EffectReset()// Reset All Effect and Delay
-    {
-        CancelInvoke();
-        NextBtn.GetComponent<Animation>().Stop();
-        NextBtn.SetActive(false);
-        Audio.Stop();
-        NarrationEnd.Stop();
-        Invoke("NextBtnEffect", 10f); //중간 평가용으로 수정
-    }
-    void NextBtnEffect()// UI Effect
-    {
-        NextBtn.SetActive(true);
-        NextBtn.GetComponent<Animation>().Play("NextBtnEffect");
-    }
-    */
 }

@@ -40,7 +40,7 @@ public class Manager_Seq : MonoBehaviour
             {
                 toggle = false;
                 Act();
-                Debug.Log("timer done");
+                //Debug.Log("timer done");
             }
         }
     }
@@ -52,14 +52,11 @@ public class Manager_Seq : MonoBehaviour
 
     void Act()
     {
-        
+        this.GetComponent<Manager_Text>().Change_UI_text(Content_Seq);
+        this.GetComponent<Manager_Narr>().Change_Audio_narr(Content_Seq);
+        this.GetComponent<Manager_Anim>().Change_Animation(Content_Seq);
 
-        //텍스트 매니저 함수 실행
-        //나레이션 매니저 함수 실행
-        //애니메이션 매니저 함수 실행
-        this.GetComponent<Manager_Text>().Change_UI_text();
-
-        if (Content_Seq == 4)
+        if (Content_Seq == 5)
         {
             //게임 실행
         }

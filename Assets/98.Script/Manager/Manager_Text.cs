@@ -33,8 +33,9 @@ public class Manager_Text : MonoBehaviour
     }
     
     //텍스트 활성화, 이전 텍스트 비활성화, 애니메이션 재생
-    public void Change_UI_text()
+    public void Change_UI_text(int Number_seq)
     {
+        Content_Seq = Number_seq;
         if (Content_Seq != 0)
         {
             UI_Text_array[Content_Seq - 1].SetActive(false);

@@ -5,15 +5,15 @@ using DG.Tweening;
 
 public class Test_animation : MonoBehaviour
 {
+
     public GameObject Penguin7;
     public GameObject Penguin_position;
 
-    //최초의 transfrom을 모두 저장해놓고 가져다 쓸까?
-    // Start is called before the first frame update
+
 
     //앞으로 다수의 오브젝트가 나오면 그걸 오토로 쓸 수가 없음
 
-    //in sequence 배열, out sequence 배열로 관리
+    //펭귄, in sequence 배열, out sequence 배열로 관리
     //0~6번
     private List<Sequence> In_seq = new List<Sequence>();
     private List<Sequence> Out_seq = new List<Sequence>();
@@ -42,10 +42,6 @@ public class Test_animation : MonoBehaviour
 
     }
 
-
-
-    //init 상태에서 전부 순차적으로 저장해놓음
-    //그리고 sequence 역시 전부 순차적으로 사전 저장해놓음
     void Init_Seq_penguin()
     {
         //in.out 시퀀스 각각 한번씩 초기화
@@ -83,5 +79,4 @@ public class Test_animation : MonoBehaviour
     //        Out_seq[i].Append(Penguin7.transform.DORotate(P7_pfrom.transform.rotation.eulerAngles, 1f));
     //    }
     //}
-
 }
