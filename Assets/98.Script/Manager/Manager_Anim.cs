@@ -11,13 +11,17 @@ public class Manager_Anim : MonoBehaviour
     //Camera
     public GameObject Main_Camera;
     public GameObject Camera_position;
-    private Sequence [] Camera_seq;
+    private Sequence[] Camera_seq;
     private int Number_Camera_seq;
+
 
     //Animal
     public GameObject Main_Penguin;
-    private GameObject [] Main_Penguin_array;
+    private GameObject[] Main_Penguin_array;
     public GameObject Penguin_position;
+
+    //Sleigh
+    public GameObject Sleigh;
     //펭귄, in sequence 배열, out sequence 배열로 관리
     //0~6번
     private Sequence[] In_p_seq;
@@ -31,6 +35,7 @@ public class Manager_Anim : MonoBehaviour
     {
         Init_Seq_camera();
         Init_Seq_penguin();
+        Shake_Seq_sleigh();
     }
     void Init_Seq_camera()
     {
@@ -76,15 +81,17 @@ public class Manager_Anim : MonoBehaviour
             Transform p3 = Penguin_pos_array[i].transform.GetChild(2).transform;
             Transform p4 = Penguin_pos_array[i].transform.GetChild(3).transform;
 
-            In_p_seq[i].Append(Main_Penguin_array[i].transform.DORotate(p2.transform.rotation.eulerAngles, 1f));
-            In_p_seq[i].Append(Main_Penguin_array[i].transform.DOMove(p2.transform.position, 1f).SetEase(Ease.InOutQuad));
-            In_p_seq[i].Append(Main_Penguin_array[i].transform.DOJump(p3.transform.position, 1f, 1, 1f));
-            In_p_seq[i].Append(Main_Penguin_array[i].transform.DORotate(p3.transform.rotation.eulerAngles, 1f));
 
-            Out_p_seq[i].Append(Main_Penguin_array[i].transform.DORotate(p4.transform.rotation.eulerAngles, 1f));
+            //애니메이션을 조금 더 자연스럽게 만들 필요는 있음
+            In_p_seq[i].Append(Main_Penguin_array[i].transform.DOMove(p2.transform.position, 1f).SetEase(Ease.InOutQuad));
+            In_p_seq[i].Join(Main_Penguin_array[i].transform.DORotate(p2.transform.rotation.eulerAngles, 1f));
+            In_p_seq[i].Append(Main_Penguin_array[i].transform.DOJump(p3.transform.position, 1f, 1, 1f));
+            In_p_seq[i].Join(Main_Penguin_array[i].transform.DORotate(p3.transform.rotation.eulerAngles, 1f));
+
             Out_p_seq[i].Append(Main_Penguin_array[i].transform.DOMove(p4.transform.position, 1f).SetEase(Ease.InOutQuad));
+            Out_p_seq[i].Join(Main_Penguin_array[i].transform.DORotate(p4.transform.rotation.eulerAngles, 1f));
             Out_p_seq[i].Append(Main_Penguin_array[i].transform.DOJump(p1.transform.position, 1f, 1, 1f));
-            Out_p_seq[i].Append(Main_Penguin_array[i].transform.DORotate(p1.transform.rotation.eulerAngles, 1f));
+            Out_p_seq[i].Join(Main_Penguin_array[i].transform.DORotate(p1.transform.rotation.eulerAngles, 1f));
 
             In_p_seq[i].Pause();
             Out_p_seq[i].Pause();
@@ -93,11 +100,30 @@ public class Manager_Anim : MonoBehaviour
             //Debug.Log("length " + Camera_seq.Length);
         }
     }
+
+    
     void Move_Seq_camera()
     {
+        //함수로 전부 관리하는게 맞음
+        //클릭이 되면 해당하는 펭귄을 움직일 거였으니깐
         Camera_seq[Number_Camera_seq].Play();
         Number_Camera_seq++;
         //Debug.Log("C_SEQ = " + Number_Camera_seq);
+    }
+
+    void Shake_Seq_sleigh()
+    {
+        Sequence Shake = DOTween.Sequence();
+        Shake.Append(Sleigh.transform.DOShakeScale(1,1,10,90,true).SetEase(Ease.OutQuad));
+        //Shake.Append(Sleigh.transform.DOShakePosition(1,1,10,1,false,true).SetEase(Ease.InOutQuad));
+        //흔들리는 애니메이션
+        //날아가는 애니메이션
+    }
+
+    void Fly_Seq_sleigh()
+    {
+        //흔들리는 애니메이션
+        //날아가는 애니메이션
     }
     void Move_Seq_penguin()
     {
@@ -132,7 +158,8 @@ public class Manager_Anim : MonoBehaviour
         {
             Move_Seq_camera();
             //Debug.Log("SEQ = " + Content_Seq);
-        }else if (Content_Seq == 4)
+        }
+        else if (Content_Seq == 4)
         {
             Move_Seq_penguin();
         }
