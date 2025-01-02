@@ -22,6 +22,7 @@ public class Manager_Anim : MonoBehaviour
 
     //Sleigh
     public GameObject Sleigh;
+    public GameObject Sleigh_position;
     //펭귄, in sequence 배열, out sequence 배열로 관리
     //0~6번
     private Sequence[] In_p_seq;
@@ -88,9 +89,10 @@ public class Manager_Anim : MonoBehaviour
             In_p_seq[i].Append(Main_Penguin_array[i].transform.DOJump(p3.transform.position, 1f, 1, 1f));
             In_p_seq[i].Join(Main_Penguin_array[i].transform.DORotate(p3.transform.rotation.eulerAngles, 1f));
 
-            Out_p_seq[i].Append(Main_Penguin_array[i].transform.DOMove(p4.transform.position, 1f).SetEase(Ease.InOutQuad));
+
+            Out_p_seq[i].Append(Main_Penguin_array[i].transform.DOJump(p4.transform.position, 1f, 1, 1f));
             Out_p_seq[i].Join(Main_Penguin_array[i].transform.DORotate(p4.transform.rotation.eulerAngles, 1f));
-            Out_p_seq[i].Append(Main_Penguin_array[i].transform.DOJump(p1.transform.position, 1f, 1, 1f));
+            Out_p_seq[i].Append(Main_Penguin_array[i].transform.DOMove(p1.transform.position, 1f).SetEase(Ease.InOutQuad));
             Out_p_seq[i].Join(Main_Penguin_array[i].transform.DORotate(p1.transform.rotation.eulerAngles, 1f));
 
             In_p_seq[i].Pause();
@@ -111,7 +113,7 @@ public class Manager_Anim : MonoBehaviour
         //Debug.Log("C_SEQ = " + Number_Camera_seq);
     }
 
-    void Shake_Seq_sleigh()
+    public void Shake_Seq_sleigh()
     {
         Sequence Shake = DOTween.Sequence();
         Shake.Append(Sleigh.transform.DOShakeScale(1,1,10,90,true).SetEase(Ease.OutQuad));
@@ -120,28 +122,40 @@ public class Manager_Anim : MonoBehaviour
         //날아가는 애니메이션
     }
 
-    void Fly_Seq_sleigh()
+    public void Fly_Seq_sleigh()
     {
-        //흔들리는 애니메이션
-        //날아가는 애니메이션
+        Sequence Fly = DOTween.Sequence();
+
+        Transform p1 = Sleigh_position.transform.GetChild(0).transform;
+        Transform p2 = Sleigh_position.transform.GetChild(1).transform;
+        Transform p3 = Sleigh_position.transform.GetChild(2).transform;
+
+
+        //펭귄 원상 복구 애니메이션
+        Fly.Append(Sleigh.transform.DOScale(new Vector3(0.7f, 0.7f, 0.7f), 1f).SetEase(Ease.InOutQuad));
+        Fly.Append(Sleigh.transform.DOMove(p1.transform.position, 1f).SetEase(Ease.InOutQuad));
+        Fly.Join(Sleigh.transform.DORotate(p1.transform.rotation.eulerAngles, 1f));
+        Fly.Append(Sleigh.transform.DOJump(p2.transform.position, 1f, 1, 1f));
+        Fly.Join(Sleigh.transform.DORotate(p2.transform.rotation.eulerAngles, 1f));
+        Fly.Append(Sleigh.transform.DOJump(p3.transform.position, 1f, 1, 1f));
+        Fly.Join(Sleigh.transform.DORotate(p3.transform.rotation.eulerAngles, 1f));
     }
-    void Move_Seq_penguin()
+    public void Move_Seq_penguin(int Num)
     {
-        //안으로 들어가는 애니메이션 일괄 하고
-        //잠시 뒤 몇 마리 돌아오고
-        //다시 집어넣고
-        //다음으로 진행
+        In_p_seq[Num].Play();
+        Out_p_seq[Num].Play().SetDelay(3);
 
-        In_p_seq[0].Play();
-        In_p_seq[1].Play();
-        In_p_seq[2].Play();
-        In_p_seq[3].Play();
-        In_p_seq[4].Play();
-        In_p_seq[5].Play();
-        In_p_seq[6].Play();
-
-        Number_Camera_seq++;
-        //Debug.Log("C_SEQ = " + Number_Camera_seq);
+        //시간 지나면 다시 돌아오는 애니메이션?
+    }
+    public void Move_All_penguin()
+    {
+        In_p_seq[0].Restart();
+        In_p_seq[1].Restart();
+        In_p_seq[2].Restart();
+        In_p_seq[3].Restart();
+        In_p_seq[4].Restart();
+        In_p_seq[5].Restart();
+        In_p_seq[6].Restart();
     }
 
     //펭귄 애니메이션의 경우 총 10번 하는걸로 하고, 각각 한번씩 돌아온 다음에 랜덤으로 3번 더 하고 출발하는 걸로
@@ -154,14 +168,10 @@ public class Manager_Anim : MonoBehaviour
     public void Change_Animation(int Number_seq)
     {
         Content_Seq = Number_seq;
-        if (Content_Seq == 1 || Content_Seq == 2)
+        if (Content_Seq == 3 || Content_Seq == 7 || Content_Seq == 9 || Content_Seq == 14)
         {
             Move_Seq_camera();
             //Debug.Log("SEQ = " + Content_Seq);
-        }
-        else if (Content_Seq == 4)
-        {
-            Move_Seq_penguin();
         }
     }
 }

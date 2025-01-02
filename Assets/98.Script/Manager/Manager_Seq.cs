@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using DG.Tweening;
 
 public class Manager_Seq : MonoBehaviour
 {
@@ -14,11 +15,21 @@ public class Manager_Seq : MonoBehaviour
     //최초 예외 처리 대신에 0으로 설정
     public float Sequence_timer = 0f;
 
-
     private bool toggle = true;
 
+    //동물 그룹
+    //펭귄 그룹, 곰 그룹 잠시 조작 해야할 거 같은데
+    public GameObject Sleigh;
+    public GameObject Bear;
+
+    //펭귄 게임
+    public GameObject UI_Button;
+    private int On_penguin = 0;
+    public GameObject UI_Message;
+
+
     [Header("[ COMPONENT CHECK ]")]
-    public GameObject[] UI_Text_array;
+    public GameObject[] UI_Button_array2;     
     //시간, 게임 유무?
 
     // Start is called before the first frame update
@@ -56,16 +67,36 @@ public class Manager_Seq : MonoBehaviour
         this.GetComponent<Manager_Narr>().Change_Audio_narr(Content_Seq);
         this.GetComponent<Manager_Anim>().Change_Animation(Content_Seq);
 
-        if (Content_Seq == 5)
+        if (Content_Seq == 3)
         {
-            //게임 실행
+            Sleigh.SetActive(true);
+            Content_Seq += 1;
+            toggle = true;
+            Timer_set();
         }
-        else if (Content_Seq == 12)
+        else if(Content_Seq == 4)
         {
-            //2번째 게임 실행
+            Init_Game_penquin1();
         }
-        else if (Content_Seq == 15)
+        else if (Content_Seq == 6)
         {
+            Init_Game_penquin2();
+        }
+        else if (Content_Seq == 9)
+        {
+            Sleigh.SetActive(false);
+            Bear.SetActive(true);
+
+
+            Content_Seq += 1;
+            toggle = true;
+            Timer_set();
+            //12 낚시 게임
+        }
+        else if (Content_Seq == 14)
+        {
+            Sleigh.SetActive(true);
+            Bear.SetActive(true);
             Debug.Log("CONTENT END");
         }
         else
@@ -76,19 +107,85 @@ public class Manager_Seq : MonoBehaviour
         }
     }
 
-    void Game_penquin()
+    void Init_Game_penquin1()
     {
+        //펭귄 1
+        On_penguin = 0;
+        UI_Button.SetActive(true);
+        UI_Button_array2 = new GameObject[UI_Button.transform.childCount];
 
+        for (int i = 0; i < UI_Button.transform.childCount; i++)
+        {
+            UI_Button_array2[i] = UI_Button.transform.GetChild(i).gameObject;
+        }
+    }
+    void Init_Game_penquin2()
+    {
+        //펭귄 1
+        On_penguin = 0;
+        UI_Button.SetActive(true);
     }
 
     void Game_bear()
     {
-
+        //물고기도 활성화
+        //물고기 클릭시 목표 지점으로 이동
+        //물고기 화면에 있는거 전부 잡으면 다음 게임으로 이동
     }
 
     void Timer_set()
     {
         Sequence_timer = 5f;
         //여기 이 부분을 나중에는 지정을 해주던가 아니면 그 특정 부분만 다른 데이터로 넣어주던가 해야함
+    }
+
+    public void penguin_button(int Num_button)
+    {
+        //penguin game 1
+        if (Content_Seq == 4)
+        {
+            On_penguin++;
+            //클릭한 뒤 탑승 애니메이션 및 잠시 후 다시 하차 애니메이션 재생
+            this.GetComponent<Manager_Anim>().Move_Seq_penguin(Num_button);
+            if(On_penguin == 3) 
+            { 
+                UI_Message.SetActive(true);
+            }
+            
+            if (On_penguin == 10)
+            {
+                //만약에 펭귄이 아직 돌아오지 않으면? 해당하는 버튼 클릭은 잠시 비활성화 해야하는거 아닌가?
+                this.GetComponent<Manager_Anim>().Move_All_penguin();
+
+                UI_Button.SetActive(false);
+
+                //임시 메시지 회수
+                UI_Message.SetActive(false);
+                //효과음 재생, 이펙트 출현
+                Content_Seq += 1;
+                toggle = true;
+                Timer_set();
+            }
+            //총 10개 보내놓고 완성되면 효과음, 이펙트 나오면서 다음으로 진행
+
+        }
+        //penguin game 2
+        else if (Content_Seq == 6)
+        {
+            On_penguin++;
+            UI_Button_array2[Num_button].SetActive(false);
+            this.GetComponent<Manager_Anim>().Shake_Seq_sleigh();
+            //해당하는 펭귄 들어감
+            if (On_penguin == 7)
+            {
+
+                this.GetComponent<Manager_Anim>().Fly_Seq_sleigh();
+
+                Content_Seq += 1;
+                toggle = true;
+                Timer_set();
+                //썰매 날아가는 애니메이션
+            }
+        }
     }
 }
