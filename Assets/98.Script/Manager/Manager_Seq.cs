@@ -21,12 +21,17 @@ public class Manager_Seq : MonoBehaviour
     //펭귄 그룹, 곰 그룹 잠시 조작 해야할 거 같은데
     public GameObject Sleigh;
     public GameObject Bear;
+    public GameObject Fishs;
 
     //펭귄 게임
     public GameObject UI_Button;
     private int On_penguin = 0;
     public GameObject UI_Message;
 
+    //낚시 게임
+    private int On_fish = 0;
+    private bool Fishing = false;
+    private GameObject [] Fish;
 
     [Header("[ COMPONENT CHECK ]")]
     public GameObject[] UI_Button_array2;     
@@ -52,6 +57,24 @@ public class Manager_Seq : MonoBehaviour
                 toggle = false;
                 Act();
                 //Debug.Log("timer done");
+            }
+        }
+
+        //12 낚시 게임
+        if (Fishing)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                Fish[On_fish].SetActive(false);
+                Fish[On_fish+7].SetActive(true);
+                On_fish+=1;
+                if (On_fish == 8)
+                {
+                    Content_Seq += 1;
+                    toggle = true;
+                    Timer_set();
+                    Fishing = false;
+                }
             }
         }
     }
@@ -85,18 +108,19 @@ public class Manager_Seq : MonoBehaviour
         else if (Content_Seq == 9)
         {
             Sleigh.SetActive(false);
-            Bear.SetActive(true);
-
-
             Content_Seq += 1;
             toggle = true;
+            Bear.SetActive(true);
+            Fishs.SetActive(true);
             Timer_set();
-            //12 낚시 게임
         }
-        else if (Content_Seq == 14)
+        else if (Content_Seq == 10)
+        {
+            Init_Game_bear();
+        }
+        else if (Content_Seq == 12)
         {
             Sleigh.SetActive(true);
-            Bear.SetActive(true);
             Debug.Log("CONTENT END");
         }
         else
@@ -126,11 +150,14 @@ public class Manager_Seq : MonoBehaviour
         UI_Button.SetActive(true);
     }
 
-    void Game_bear()
+    void Init_Game_bear()
     {
-        //물고기도 활성화
-        //물고기 클릭시 목표 지점으로 이동
-        //물고기 화면에 있는거 전부 잡으면 다음 게임으로 이동
+        Fish = new GameObject[Fishs.transform.childCount];
+        for (int i = 0; i < Fishs.transform.childCount; i++)
+        {
+            Fish[i] = Fishs.transform.GetChild(i).gameObject;
+        }
+        Fishing = true;
     }
 
     void Timer_set()
@@ -184,7 +211,6 @@ public class Manager_Seq : MonoBehaviour
                 Content_Seq += 1;
                 toggle = true;
                 Timer_set();
-                //썰매 날아가는 애니메이션
             }
         }
     }

@@ -168,7 +168,7 @@ public class Manager_Anim : MonoBehaviour
     public void Change_Animation(int Number_seq)
     {
         Content_Seq = Number_seq;
-        if (Content_Seq == 3 || Content_Seq == 7 || Content_Seq == 9 || Content_Seq == 14)
+        if (Content_Seq == 3 || Content_Seq == 7 || Content_Seq == 9 || Content_Seq == 12)
         {
             Move_Seq_camera();
             //Debug.Log("SEQ = " + Content_Seq);
