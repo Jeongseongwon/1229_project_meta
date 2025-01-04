@@ -32,8 +32,7 @@ public class Manager_Anim_2 : MonoBehaviour
     void Start()
     {
         Init_Seq_camera();
-        Init_Seq_penguin();
-        Shake_Seq_sleigh();
+        Init_Seq_animal();
     }
     //공통으로 활용할 부분
     void Init_Seq_camera()
@@ -60,48 +59,46 @@ public class Manager_Anim_2 : MonoBehaviour
 
     void Init_Seq_animal()
     {
-        Penguin_pos_array = new GameObject[Penguin_position.transform.childCount];
-        Main_Penguin_array = new GameObject[Main_Penguin.transform.childCount];
-        In_p_seq = new Sequence[Penguin_position.transform.childCount];
-        Out_p_seq = new Sequence[Penguin_position.transform.childCount];
+        Animal_pos_array = new GameObject[Animal_position.transform.childCount];
+        Main_Animal_array = new GameObject[Main_Animal.transform.childCount];
+        Hide_a_seq = new Sequence[Animal_position.transform.childCount];
+        Reveal_a_seq = new Sequence[Animal_position.transform.childCount];
 
-        //in.out 시퀀스 각각 한번씩 초기화
-        //메인 이동 펭귄 할당
-        for (int i = 0; i < Penguin_position.transform.childCount; i++)
+        //hide, reveal 시퀀스 각각 한번씩 초기화
+        //메인 이동 동물 할당
+        for (int i = 0; i < Animal_position.transform.childCount; i++)
         {
-            Penguin_pos_array[i] = Penguin_position.transform.GetChild(i).gameObject;
-            Main_Penguin_array[i] = Main_Penguin.transform.GetChild(i).gameObject;
+            Animal_pos_array[i] = Animal_position.transform.GetChild(i).gameObject;
+            Main_Animal_array[i] = Main_Animal.transform.GetChild(i).gameObject;
 
-            In_p_seq[i] = DOTween.Sequence().SetAutoKill(false);
-            Out_p_seq[i] = DOTween.Sequence().SetAutoKill(false);
+            Hide_a_seq[i] = DOTween.Sequence().SetAutoKill(false);
+            Reveal_a_seq[i] = DOTween.Sequence().SetAutoKill(false);
 
-            Transform p1 = Penguin_pos_array[i].transform.GetChild(0).transform;
-            Transform p2 = Penguin_pos_array[i].transform.GetChild(1).transform;
-            Transform p3 = Penguin_pos_array[i].transform.GetChild(2).transform;
-            Transform p4 = Penguin_pos_array[i].transform.GetChild(3).transform;
+            Transform p0 = Animal_pos_array[i].transform.GetChild(0).transform;
+            Transform p1 = Animal_pos_array[i].transform.GetChild(1).transform;
+            Transform p2 = Animal_pos_array[i].transform.GetChild(2).transform;
+            Transform p3 = Animal_pos_array[i].transform.GetChild(3).transform;
 
 
             //애니메이션을 조금 더 자연스럽게 만들 필요는 있음
-            In_p_seq[i].Append(Main_Penguin_array[i].transform.DOMove(p2.transform.position, 1f).SetEase(Ease.InOutQuad));
-            In_p_seq[i].Join(Main_Penguin_array[i].transform.DORotate(p2.transform.rotation.eulerAngles, 1f));
-            In_p_seq[i].Append(Main_Penguin_array[i].transform.DOJump(p3.transform.position, 1f, 1, 1f));
-            In_p_seq[i].Join(Main_Penguin_array[i].transform.DORotate(p3.transform.rotation.eulerAngles, 1f));
+            Hide_a_seq[i].Append(Main_Animal_array[i].transform.DOMove(p1.position, 1f).SetEase(Ease.InOutQuad));
+            Hide_a_seq[i].Join(Main_Animal_array[i].transform.DORotate(p1.rotation.eulerAngles, 1f));
 
 
-            Out_p_seq[i].Append(Main_Penguin_array[i].transform.DOJump(p4.transform.position, 1f, 1, 1f));
-            Out_p_seq[i].Join(Main_Penguin_array[i].transform.DORotate(p4.transform.rotation.eulerAngles, 1f));
-            Out_p_seq[i].Append(Main_Penguin_array[i].transform.DOMove(p1.transform.position, 1f).SetEase(Ease.InOutQuad));
-            Out_p_seq[i].Join(Main_Penguin_array[i].transform.DORotate(p1.transform.rotation.eulerAngles, 1f));
+            Reveal_a_seq[i].Append(Main_Animal_array[i].transform.DOMove(p2.position, 1f).SetEase(Ease.InOutQuad));
+            Reveal_a_seq[i].Join(Main_Animal_array[i].transform.DORotate(p2.rotation.eulerAngles, 1f));
+            Reveal_a_seq[i].Append(Main_Animal_array[i].transform.DOScale(p2.localScale, 1f).SetEase(Ease.InOutQuad));
+            Reveal_a_seq[i].Append(Main_Animal_array[i].transform.DOMove(p3.position, 3f).SetEase(Ease.InOutQuad).SetDelay(5f));
 
-            In_p_seq[i].Pause();
-            Out_p_seq[i].Pause();
+            Hide_a_seq[i].Pause();
+            Reveal_a_seq[i].Pause();
 
 
             //Debug.Log("length " + Camera_seq.Length);
         }
     }
 
-    
+
     void Move_Seq_camera()
     {
         //함수로 전부 관리하는게 맞음
@@ -111,65 +108,74 @@ public class Manager_Anim_2 : MonoBehaviour
         //Debug.Log("C_SEQ = " + Number_Camera_seq);
     }
 
-    public void Shake_Seq_sleigh()
+    public void Hide_Seq_animal(int Num)
     {
-        Sequence Shake = DOTween.Sequence();
-        Shake.Append(Sleigh.transform.DOShakeScale(1,1,10,90,true).SetEase(Ease.OutQuad));
-        //Shake.Append(Sleigh.transform.DOShakePosition(1,1,10,1,false,true).SetEase(Ease.InOutQuad));
-        //흔들리는 애니메이션
-        //날아가는 애니메이션
+        Hide_a_seq[Num].Play();
+    }
+    public void Reveal_Seq_animal(int Num)
+    {
+        Reveal_a_seq[Num].Play();
     }
 
-    public void Fly_Seq_sleigh()
+    public void Hide_All_animal()
     {
-        Sequence Fly = DOTween.Sequence();
+        Hide_a_seq[0].Play();
+        Hide_a_seq[1].Play();
+        Hide_a_seq[2].Play();
+        Hide_a_seq[3].Play();
+        Hide_a_seq[4].Play();
+        Hide_a_seq[5].Play();
+        Hide_a_seq[6].Play();
 
-        Transform p1 = Sleigh_position.transform.GetChild(0).transform;
-        Transform p2 = Sleigh_position.transform.GetChild(1).transform;
-        Transform p3 = Sleigh_position.transform.GetChild(2).transform;
-
-
-        //펭귄 원상 복구 애니메이션
-        Fly.Append(Sleigh.transform.DOScale(new Vector3(0.7f, 0.7f, 0.7f), 1f).SetEase(Ease.InOutQuad));
-        Fly.Append(Sleigh.transform.DOMove(p1.transform.position, 1f).SetEase(Ease.InOutQuad));
-        Fly.Join(Sleigh.transform.DORotate(p1.transform.rotation.eulerAngles, 1f));
-        Fly.Append(Sleigh.transform.DOJump(p2.transform.position, 1f, 1, 1f));
-        Fly.Join(Sleigh.transform.DORotate(p2.transform.rotation.eulerAngles, 1f));
-        Fly.Append(Sleigh.transform.DOJump(p3.transform.position, 1f, 1, 1f));
-        Fly.Join(Sleigh.transform.DORotate(p3.transform.rotation.eulerAngles, 1f));
-    }
-    public void Move_Seq_penguin(int Num)
-    {
-        In_p_seq[Num].Play();
-        Out_p_seq[Num].Play().SetDelay(3);
-
-        //시간 지나면 다시 돌아오는 애니메이션?
-    }
-    public void Move_All_penguin()
-    {
-        In_p_seq[0].Restart();
-        In_p_seq[1].Restart();
-        In_p_seq[2].Restart();
-        In_p_seq[3].Restart();
-        In_p_seq[4].Restart();
-        In_p_seq[5].Restart();
-        In_p_seq[6].Restart();
     }
 
-    //펭귄 애니메이션의 경우 총 10번 하는걸로 하고, 각각 한번씩 돌아온 다음에 랜덤으로 3번 더 하고 출발하는 걸로
-    //썰매 애니메이션의 경우 잠깐 흔들어주는걸로 하고, 게임 종료 된 이후에 한번만 함
-    //그리고 카메라 이동하고 각각 텍스트 보여줌
-    //눈썰매 애니메이션이 하나 더 잇구만
-    //곰 애니메이션의 경우 하나도 없고 물고기만 튀어오른 다음에 곰까지 하는걸로
+    public void Reveal_All_animal()
+    {
+        Reveal_a_seq[0].Play();
+        Reveal_a_seq[1].Play();
+        Reveal_a_seq[2].Play();
+        Reveal_a_seq[3].Play();
+        Reveal_a_seq[4].Play();
+        Reveal_a_seq[5].Play();
+        Reveal_a_seq[6].Play();
+    }
 
-    //해당하는 seq 번호에 호출 필요
+
     public void Change_Animation(int Number_seq)
     {
         Content_Seq = Number_seq;
-        if (Content_Seq == 3 || Content_Seq == 7 || Content_Seq == 9 || Content_Seq == 12)
+        if (Content_Seq == 1 || Content_Seq == 3 || Content_Seq == 5)
         {
             Move_Seq_camera();
             //Debug.Log("SEQ = " + Content_Seq);
         }
     }
+
+    //public void Shake_Seq_sleigh()
+    //{
+    //    Sequence Shake = DOTween.Sequence();
+    //    Shake.Append(Sleigh.transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad));
+    //    //Shake.Append(Sleigh.transform.DOShakePosition(1,1,10,1,false,true).SetEase(Ease.InOutQuad));
+    //    //흔들리는 애니메이션
+    //    //날아가는 애니메이션
+    //}
+
+    //public void Fly_Seq_sleigh()
+    //{
+    //    Sequence Fly = DOTween.Sequence();
+
+    //    Transform p1 = Sleigh_position.transform.GetChild(0).transform;
+    //    Transform p2 = Sleigh_position.transform.GetChild(1).transform;
+    //    Transform p3 = Sleigh_position.transform.GetChild(2).transform;
+
+
+    //    //펭귄 원상 복구 애니메이션
+    //    Fly.Append(Sleigh.transform.DOScale(new Vector3(0.7f, 0.7f, 0.7f), 1f).SetEase(Ease.InOutQuad));
+    //    Fly.Append(Sleigh.transform.DOMove(p1.transform.position, 1f).SetEase(Ease.InOutQuad));
+    //    Fly.Join(Sleigh.transform.DORotate(p1.transform.rotation.eulerAngles, 1f));
+    //    Fly.Append(Sleigh.transform.DOJump(p2.transform.position, 1f, 1, 1f));
+    //    Fly.Join(Sleigh.transform.DORotate(p2.transform.rotation.eulerAngles, 1f));
+    //    Fly.Append(Sleigh.transform.DOJump(p3.transform.position, 1f, 1, 1f));
+    //    Fly.Join(Sleigh.transform.DORotate(p3.transform.rotation.eulerAngles, 1f));
+    //}
 }

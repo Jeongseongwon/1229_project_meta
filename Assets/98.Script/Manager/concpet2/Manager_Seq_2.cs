@@ -8,27 +8,46 @@ using DG.Tweening;
 public class Manager_Seq_2 : MonoBehaviour
 {
 
+    public static Manager_Seq_2 instance = null;
 
-    public int Content_Seq = 0;
+    private Manager_Text Manager_Text;
+    private Manager_Anim_2  Manager_Anim;
+    private Manager_Narr Manager_Narr;
 
-
-    //최초 예외 처리 대신에 0으로 설정
-    public float Sequence_timer = 0f;
+    public GameObject Eventsystem;
 
     private bool toggle = true;
 
     //동물 그룹
-    public GameObject Animal;
     private int On_game;
 
     [Header("[ COMPONENT CHECK ]")]
-    public GameObject[] UI_Message_array;     
+
+    public int Content_Seq = 0;
+    //최초 예외 처리 대신에 0으로 설정
+    public float Sequence_timer = 0f;
     //시간, 게임 유무?
+
+    void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+
+            DontDestroyOnLoad(this.gameObject);
+        }
+        else
+        {
+            Destroy(this.gameObject);
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        Manager_Text = this.gameObject.GetComponent<Manager_Text>();
+        Manager_Anim = this.gameObject.GetComponent<Manager_Anim_2>();
+        Manager_Narr = this.gameObject.GetComponent<Manager_Narr>();
     }
 
     // Update is called once per frame
@@ -48,7 +67,7 @@ public class Manager_Seq_2 : MonoBehaviour
             }
         }
 
-        
+
     }
 
 
@@ -58,21 +77,35 @@ public class Manager_Seq_2 : MonoBehaviour
 
     void Act()
     {
-        this.GetComponent<Manager_Text>().Change_UI_text(Content_Seq);
-        this.GetComponent<Manager_Narr>().Change_Audio_narr(Content_Seq);
-        this.GetComponent<Manager_Anim_2>().Change_Animation(Content_Seq);
+        Manager_Text.Change_UI_text(Content_Seq);
+        Manager_Narr.Change_Audio_narr(Content_Seq);
+        Manager_Anim.Change_Animation(Content_Seq);
 
+        //여기는 이미 2번인데 텍스트, 나레이션은 아직 1번이어서 오는 괴리가미 있음
         if (Content_Seq == 2)
         {
-
+            Init_Game_hide();
         }
-        else if(Content_Seq == 4)
+        else if (Content_Seq == 3)
         {
-            
+            Manager_Text.Inactiveall_UI_message();
+
+            Content_Seq += 1;
+            toggle = true;
+            Timer_set();
+        }
+        else if (Content_Seq == 4)
+        {
+            Init_Game_reveal();
         }
         else if (Content_Seq == 5)
         {
-           
+            Manager_Text.Inactiveall_UI_message();
+
+            Content_Seq += 1;
+            toggle = true;
+            Timer_set();
+            //동물 클릭 비활성화
         }
         else
         {
@@ -84,33 +117,26 @@ public class Manager_Seq_2 : MonoBehaviour
 
     void Init_Game_hide()
     {
-        //동물 숨기기
-        On_game = 0;
+        //메시지의 경우, T - L - E - R - P - Z - F 순서, hide, reveal
 
+        //동물 찾기
         //동물 클릭 할 수 있도록 활성화 시키고
-        //동물 클릭하면 해당하는 동물 텍스트, 나레이션, 울음소리 재생
-        //그리고 시간 지나면 동물 숨는 애니메이션 재생
-
+        Eventsystem.SetActive(true);
+        On_game = 0;
+        //Manager_Anim.Hide_All_animal();
     }
     void Init_Game_reveal()
     {
         //동물 찾기
-        On_game = 0;
-
-
         //동물 클릭 할 수 있도록 활성화 시키고
-        //동물 클릭하면 해당하는 동물 텍스트, 나레이션 재생
-        //그리고 시간 지나면 가운데로 나오는 애니메이션 및 울음소리 재생
+        Eventsystem.SetActive(true);
+        On_game = 0;
     }
     void Init_Game_read()
     {
         //동물 찾기
+        //동물 클릭 할 수 있도록 활성화 시키고
         On_game = 0;
-
-
-        //그냥 순차적으로 동물 움직이는 애니메이션 및
-        //해당하는 동물 텍스트, 나레이션 재생
-        
     }
     void Timer_set()
     {
@@ -118,4 +144,40 @@ public class Manager_Seq_2 : MonoBehaviour
         //여기 이 부분을 나중에는 지정을 해주던가 아니면 그 특정 부분만 다른 데이터로 넣어주던가 해야함
     }
 
+    public void animal_button(int Num_button)
+    {
+        //seq 2번일 경우 상단
+        //seq 4번일 경우 하당
+        if (Content_Seq == 2)
+        {
+            Manager_Text.Active_UI_message(Num_button);
+            Manager_Anim.Hide_Seq_animal(Num_button);
+            //나중에 위치 맞춰줄 필요 있음
+            //1초 정도 지연시간을 두고 다음 것을 클릭할 수 있도록 함
+            On_game += 1;
+        }
+        else if (Content_Seq == 4)
+        {
+            Manager_Text.Active_UI_message(Num_button+7);
+            Manager_Anim.Reveal_Seq_animal(Num_button);
+
+
+            //각 동물의 애니메이션이 전부 종료 될 때 까지 지연시간을 두고 다음 것을 클릭할 수 있도록 함
+            Manager_Text.Active_UI_Panel();
+            On_game += 1;
+        }
+
+        if (On_game == 7)
+        {
+
+            //효과음 재생, 이펙트 출현
+            Eventsystem.SetActive(false);
+            Content_Seq += 1;
+            toggle = true;
+            Timer_set();
+        }
+
+
+        //그리고 전부 종료 되면 비활성화 하는 것도 감안
+    }
 }
