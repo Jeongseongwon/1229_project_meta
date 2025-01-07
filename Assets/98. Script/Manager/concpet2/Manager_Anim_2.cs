@@ -24,6 +24,7 @@ public class Manager_Anim_2 : MonoBehaviour
     //0~6번
     private Sequence[] Hide_a_seq;
     private Sequence[] Reveal_a_seq;
+    private Sequence[] Reset_a_seq;
 
     [Header("[ COMPONENT CHECK ]")]
     public GameObject[] Camera_pos_array;
@@ -59,10 +60,11 @@ public class Manager_Anim_2 : MonoBehaviour
 
     void Init_Seq_animal()
     {
-        Animal_pos_array = new GameObject[Animal_position.transform.childCount];
         Main_Animal_array = new GameObject[Main_Animal.transform.childCount];
+        Animal_pos_array = new GameObject[Animal_position.transform.childCount];
         Hide_a_seq = new Sequence[Animal_position.transform.childCount];
         Reveal_a_seq = new Sequence[Animal_position.transform.childCount];
+        Reset_a_seq = new Sequence[Animal_position.transform.childCount];
 
         //hide, reveal 시퀀스 각각 한번씩 초기화
         //메인 이동 동물 할당
@@ -71,8 +73,9 @@ public class Manager_Anim_2 : MonoBehaviour
             Animal_pos_array[i] = Animal_position.transform.GetChild(i).gameObject;
             Main_Animal_array[i] = Main_Animal.transform.GetChild(i).gameObject;
 
-            Hide_a_seq[i] = DOTween.Sequence().SetAutoKill(false);
-            Reveal_a_seq[i] = DOTween.Sequence().SetAutoKill(false);
+            Hide_a_seq[i] = DOTween.Sequence();
+            Reveal_a_seq[i] = DOTween.Sequence();
+            Reset_a_seq[i] = DOTween.Sequence();
 
             Transform p0 = Animal_pos_array[i].transform.GetChild(0).transform;
             Transform p1 = Animal_pos_array[i].transform.GetChild(1).transform;
@@ -88,10 +91,16 @@ public class Manager_Anim_2 : MonoBehaviour
             Reveal_a_seq[i].Append(Main_Animal_array[i].transform.DOMove(p2.position, 1f).SetEase(Ease.InOutQuad));
             Reveal_a_seq[i].Join(Main_Animal_array[i].transform.DORotate(p2.rotation.eulerAngles, 1f));
             Reveal_a_seq[i].Append(Main_Animal_array[i].transform.DOScale(p2.localScale, 1f).SetEase(Ease.InOutQuad));
-            Reveal_a_seq[i].Append(Main_Animal_array[i].transform.DOMove(p3.position, 3f).SetEase(Ease.InOutQuad).SetDelay(5f));
+            Reveal_a_seq[i].Append(Main_Animal_array[i].transform.DOMove(p3.position, 1.5f).SetEase(Ease.InOutQuad).SetDelay(5f));
+
+
+            Reset_a_seq[i].Append(Main_Animal_array[i].transform.DOMove(p0.position, 0.1f).SetEase(Ease.InOutQuad));
+            Reset_a_seq[i].Join(Main_Animal_array[i].transform.DORotate(p0.rotation.eulerAngles, 0.1f));
+            Reset_a_seq[i].Join(Main_Animal_array[i].transform.DOScale(p0.localScale, 0.1f));
 
             Hide_a_seq[i].Pause();
             Reveal_a_seq[i].Pause();
+            Reset_a_seq[i].Pause();
 
 
             //Debug.Log("length " + Camera_seq.Length);
@@ -111,22 +120,31 @@ public class Manager_Anim_2 : MonoBehaviour
     public void Hide_Seq_animal(int Num)
     {
         Hide_a_seq[Num].Play();
+        //(임시) 해당 동물 클릭 스크립트 비활성화
+        Main_Animal_array[Num].GetComponent<Clicked_animal>().enabled = false;
     }
     public void Reveal_Seq_animal(int Num)
     {
         Reveal_a_seq[Num].Play();
     }
 
-    public void Hide_All_animal()
+    public void Reset_Seq_animal(int Num)
     {
-        Hide_a_seq[0].Play();
-        Hide_a_seq[1].Play();
-        Hide_a_seq[2].Play();
-        Hide_a_seq[3].Play();
-        Hide_a_seq[4].Play();
-        Hide_a_seq[5].Play();
-        Hide_a_seq[6].Play();
+        Reset_a_seq[Num].Play();
+        //(임시) 해당 동물 클릭 스크립트 활성화
+        Main_Animal_array[Num].GetComponent<Clicked_animal>().enabled = true;
+    }
 
+    //(임시) 동물 클릭 스크립트 활성화
+    public void Active_click_animal()
+    {
+        Main_Animal_array[0].GetComponent<Clicked_animal>().enabled = true;
+        Main_Animal_array[1].GetComponent<Clicked_animal>().enabled = true;
+        Main_Animal_array[2].GetComponent<Clicked_animal>().enabled = true;
+        Main_Animal_array[3].GetComponent<Clicked_animal>().enabled = true;
+        Main_Animal_array[4].GetComponent<Clicked_animal>().enabled = true;
+        Main_Animal_array[5].GetComponent<Clicked_animal>().enabled = true;
+        Main_Animal_array[6].GetComponent<Clicked_animal>().enabled = true;
     }
 
     public void Reveal_All_animal()

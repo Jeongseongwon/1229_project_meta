@@ -20,9 +20,7 @@ public class Clicked_animal : MonoBehaviour,IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log("CLECKED");
+        //Debug.Log("CLECKED");
         Manager_Seq_2.instance.animal_button(Number_animal);
-        //해당하는 동물이 무슨 동물인지 같이 넘김
-        //그리고 seq 스크립트에서 해당하는 함수도 호출함
     }
 }

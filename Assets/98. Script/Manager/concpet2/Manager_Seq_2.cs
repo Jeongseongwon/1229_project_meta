@@ -48,6 +48,8 @@ public class Manager_Seq_2 : MonoBehaviour
         Manager_Text = this.gameObject.GetComponent<Manager_Text>();
         Manager_Anim = this.gameObject.GetComponent<Manager_Anim_2>();
         Manager_Narr = this.gameObject.GetComponent<Manager_Narr>();
+
+        Eventsystem.SetActive(false);
     }
 
     // Update is called once per frame
@@ -66,8 +68,6 @@ public class Manager_Seq_2 : MonoBehaviour
                 //Debug.Log("timer done");
             }
         }
-
-
     }
 
 
@@ -101,11 +101,20 @@ public class Manager_Seq_2 : MonoBehaviour
         else if (Content_Seq == 5)
         {
             Manager_Text.Inactiveall_UI_message();
+            Init_Game_read();
 
             Content_Seq += 1;
             toggle = true;
             Timer_set();
-            //동물 클릭 비활성화
+        }
+        else if ( 6 <= Content_Seq && 12 >= Content_Seq)
+        {
+            Game_read();
+        }
+        else if (Content_Seq == 13)
+        {
+            //End, 클릭 활성화
+            Eventsystem.SetActive(true);
         }
         else
         {
@@ -119,24 +128,38 @@ public class Manager_Seq_2 : MonoBehaviour
     {
         //메시지의 경우, T - L - E - R - P - Z - F 순서, hide, reveal
 
-        //동물 찾기
-        //동물 클릭 할 수 있도록 활성화 시키고
         Eventsystem.SetActive(true);
         On_game = 0;
         //Manager_Anim.Hide_All_animal();
     }
     void Init_Game_reveal()
     {
-        //동물 찾기
-        //동물 클릭 할 수 있도록 활성화 시키고
         Eventsystem.SetActive(true);
+        Manager_Anim.Active_click_animal();
+        //다시 동물 스크립트 활성화
         On_game = 0;
     }
     void Init_Game_read()
     {
-        //동물 찾기
-        //동물 클릭 할 수 있도록 활성화 시키고
+        //동물들 위치 원상 복구
         On_game = 0;
+        Eventsystem.SetActive(false);
+        //왼쪽부터 순서대로 진행되도록 순서 조정 필요
+        Manager_Anim.Reset_Seq_animal(0);
+        Manager_Anim.Reset_Seq_animal(1);
+        Manager_Anim.Reset_Seq_animal(2);
+        Manager_Anim.Reset_Seq_animal(3);
+        Manager_Anim.Reset_Seq_animal(4);
+        Manager_Anim.Reset_Seq_animal(5);
+        Manager_Anim.Reset_Seq_animal(6);
+    }
+    void Game_read()
+    {
+        On_game += 1;
+        toggle = true;
+        Content_Seq += 1;
+        Timer_set();
+        //해당하는 동물 애니메이션 재생
     }
     void Timer_set()
     {
@@ -146,14 +169,11 @@ public class Manager_Seq_2 : MonoBehaviour
 
     public void animal_button(int Num_button)
     {
-        //seq 2번일 경우 상단
-        //seq 4번일 경우 하당
         if (Content_Seq == 2)
         {
             Manager_Text.Active_UI_message(Num_button);
             Manager_Anim.Hide_Seq_animal(Num_button);
-            //나중에 위치 맞춰줄 필요 있음
-            //1초 정도 지연시간을 두고 다음 것을 클릭할 수 있도록 함
+
             On_game += 1;
         }
         else if (Content_Seq == 4)
@@ -161,10 +181,15 @@ public class Manager_Seq_2 : MonoBehaviour
             Manager_Text.Active_UI_message(Num_button+7);
             Manager_Anim.Reveal_Seq_animal(Num_button);
 
-
             //각 동물의 애니메이션이 전부 종료 될 때 까지 지연시간을 두고 다음 것을 클릭할 수 있도록 함
             Manager_Text.Active_UI_Panel();
             On_game += 1;
+        }
+        else if (Content_Seq == 13)
+        {
+            Manager_Text.Active_UI_message(Num_button + 7);
+            Manager_Anim.Reveal_Seq_animal(Num_button);
+
         }
 
         if (On_game == 7)
@@ -176,8 +201,5 @@ public class Manager_Seq_2 : MonoBehaviour
             toggle = true;
             Timer_set();
         }
-
-
-        //그리고 전부 종료 되면 비활성화 하는 것도 감안
     }
 }

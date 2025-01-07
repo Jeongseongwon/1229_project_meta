@@ -9,6 +9,7 @@ public class Manager_Text : MonoBehaviour
 {
     //Common
     public int Content_Seq = 0;
+    public int Number_Prev_message = -1;
 
     public GameObject UI_Text;
     public GameObject UI_Message;
@@ -72,10 +73,23 @@ public class Manager_Text : MonoBehaviour
         UI_Text_array[Content_Seq].transform.DOScale(1, 1f).From(0).SetEase(Ease.OutElastic);
     }
 
+    public void Inactive_UI_Text()
+    {
+        UI_Text_array[Content_Seq].SetActive(false);
+    }
+
     public void Active_UI_message(int Number)
     {
+        Inactive_UI_Text();
+        //메시지 최초 실행시
+        if (Number_Prev_message != -1)
+        {
+            UI_Message_array[Number_Prev_message].SetActive(false);
+        }
         UI_Message_array[Number].SetActive(true);
         UI_Message_array[Number].transform.DOScale(1, 1f).From(0).SetEase(Ease.OutElastic);
+
+        Number_Prev_message = Number;
     }
 
     public void Inactive_UI_message(int Number)

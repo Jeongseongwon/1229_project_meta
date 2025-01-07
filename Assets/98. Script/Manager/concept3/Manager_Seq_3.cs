@@ -170,7 +170,7 @@ public class Manager_Seq_3 : MonoBehaviour
 
         // 메인 색깔을 포함한 5개의 과일을 랜덤으로 선택
         currentFruitDisplay.Clear();
-        currentFruitDisplay.Add(GetRandomMainColorFruit()); // 메인 색깔에 있는 과일을 반드시 포함
+        //currentFruitDisplay.Add(GetRandomMainColorFruit()); // 메인 색깔에 있는 과일을 반드시 포함
         
         FillFruitsWithRandomColors();
 
@@ -235,9 +235,9 @@ public class Manager_Seq_3 : MonoBehaviour
         if (!hasMainColorFruit)
         {
             // 메인 색깔 과일이 없다면 메인 색깔의 과일을 다시 랜덤으로 추가
-            Fruit mainFruit = GetRandomMainColorFruit();
-            currentFruitDisplay.Add(mainFruit);
-            Debug.Log($"Added {mainFruit} (Main Color) back to the list.");
+            //Fruit mainFruit = GetRandomMainColorFruit();
+            //currentFruitDisplay.Add(mainFruit);
+            //Debug.Log($"Added {mainFruit} (Main Color) back to the list.");
         }
         else
         {
@@ -254,30 +254,30 @@ public class Manager_Seq_3 : MonoBehaviour
         }
     }
     // 메인 색깔에 해당하는 과일을 랜덤으로 반환하는 함수
-    private Fruit GetRandomMainColorFruit(FruitColor mainColorInput)
-    {
-        //해당하는 벨류 리스트 받아오고
-        //거기에서 랜덤으로 하나를 뽑는다
+    //private Fruit GetRandomMainColorFruit(FruitColor mainColorInput)
+    //{
+    //    //해당하는 벨류 리스트 받아오고
+    //    //거기에서 랜덤으로 하나를 뽑는다
 
-        var fruitsInMainColor = fruitGroups[AllKeyDictionary[round]];
+    //    var fruitsInMainColor = fruitGroups[AllKeyDictionary[round]];
 
-        List<Fruit> availableFruits = new List<Fruit>();
+    //    List<Fruit> availableFruits = new List<Fruit>();
 
-        // 과일 그룹에서 과일을 랜덤하게 가져옴
-        foreach (var group in fruitsInMainColor)
-        {
-            availableFruits.AddRange(group.Value);
-        }
+    //    // 과일 그룹에서 과일을 랜덤하게 가져옴
+    //    foreach (var group in fruitsInMainColor)
+    //    {
+    //        //availableFruits.AddRange(group.Value);
+    //    }
 
-        // 메인 색깔을 제외한 과일을 4개 더 뽑음
-        for (int i = 0; i < 4; i++)
-        {
-            Fruit randomFruit = availableFruits[UnityEngine.Random.Range(0, availableFruits.Count)];
-            currentFruitDisplay.Add(randomFruit);
-        }
+    //    // 메인 색깔을 제외한 과일을 4개 더 뽑음
+    //    for (int i = 0; i < 4; i++)
+    //    {
+    //        Fruit randomFruit = availableFruits[UnityEngine.Random.Range(0, availableFruits.Count)];
+    //        currentFruitDisplay.Add(randomFruit);
+    //    }
 
-        return fruitsInMainColor[UnityEngine.Random.Range(0, 4)];
-    }
+    //    //return fruitsInMainColor[UnityEngine.Random.Range(0, 4)];
+    //}
 
     public void fruit_button(int Num_button)
     {
