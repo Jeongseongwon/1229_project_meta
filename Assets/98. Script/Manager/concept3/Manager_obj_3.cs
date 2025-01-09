@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using DG.Tweening;
 
 public class Manager_obj_3 : MonoBehaviour
@@ -14,22 +15,25 @@ public class Manager_obj_3 : MonoBehaviour
     public GameObject Camera_position;
 
     //Fruit
-    public GameObject Main_Fruit;
     public GameObject Fruit_position;
 
-    public GameObject Box;
+    //public GameObject Main_Box;
+    public GameObject Main_Box;
+    public GameObject Box_position;
+
     public GameObject [] Plate_fruit;
-    
-    //바구니 갯수 정해놓음
-    //그리고 해당 바구니가 메인 바구니가 된다면 해당 바구니의 p0, p1, p2를 불러옴
-    //바구니는 총 5개
-    //해당 바구니 순서대로 채워놓고 그대로 활용하기로함
-    //만약에 게임을 다시 시작해야하면?
-    //다시하기 누르면 씬을 다시 로드?
-    //그건 좀 그렇고 그냥 전부 다 비우고 다시 게임 시작하도록 해야지
+
+
+    public GameObject[] Fruit_prefabs;
+    public Sprite[] Fruit_text;
+    public AudioClip[] Fruit_narration;
 
     //Eventsystem
     public GameObject Eventsystem;
+
+
+    //기능 테스트 시작
+    //바구니 및 과일 정상적으로 전부 나오는지 테스트
 
     void Awake()
     {
@@ -49,8 +53,10 @@ public class Manager_obj_3 : MonoBehaviour
     {
         
     }
-    public GameObject GetPlatefruit(int num)
-    {
-        return Box.transform.GetChild(num).gameObject;
-    }
+
+    //메인 박스도 갈아끼우는게 필요함
+    //public GameObject GetPlatefruit(int num)
+    //{
+    //    return Box_groups.transform.GetChild(num).gameObject;
+    //}
 }

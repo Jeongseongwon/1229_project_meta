@@ -15,10 +15,12 @@ public class Manager_Anim_3 : MonoBehaviour
     private int Number_Camera_seq;
 
 
-    //Animal
-    private GameObject Main_Fruit;
-    private GameObject[] Main_Fruit_array;
+    //fruit
     private GameObject Fruit_position;
+
+    private GameObject Main_Box;
+    private GameObject[] Main_Box_array;
+    private GameObject Box_position;
 
     //p0 그룹 7개
     //p1 그룹 5개
@@ -31,24 +33,31 @@ public class Manager_Anim_3 : MonoBehaviour
     //대신 transform을 전부 가지고 있고 그걸 조합해서 사용하는 걸로
     //과일 어레이는 언제든지 달라질 수 있음
 
-    private Transform[] p0; //초기 위치 7개
-    private Transform[] p1; //박스 안 위치 5개
-    private Transform[] p2; //박스 밖 위치 5개
+    private Transform[] B_p0; //박스 초기 위치 5개
+    private Transform B_p1; //과일 게임 박스 위치
+    private Transform B_p2; //과일 읽기 박스 위치
 
+    public Transform[] F_p0; //과일 게임 과일 위치
+    private Transform[] F_p1; //박스내 과일 위치
+    private Transform[] F_p2; //과일 읽기 과일 위치
 
     [Header("[ COMPONENT CHECK ]")]
+    //위치 입력값 확인용
     public GameObject[] Camera_pos_array;
     public GameObject[] Fruit_pos_array;
+    public GameObject[] Box_pos_array;
 
     void Start()
     {
-        Init_Seq_camera();
-        Init_Seq_fruit();
-
         Camera_position = Manager_obj_3.instance.Camera_position;
         Main_Camera = Manager_obj_3.instance.Main_Camera;
-        Main_Fruit = Manager_obj_3.instance.Main_Fruit;
         Fruit_position = Manager_obj_3.instance.Fruit_position;
+        Box_position = Manager_obj_3.instance.Box_position;
+        Main_Box = Manager_obj_3.instance.Main_Box;
+
+        Init_Seq_camera();
+        Init_Seq_fruit();
+        Init_Seq_box();
     }
     //공통으로 활용할 부분
     void Init_Seq_camera()
@@ -73,44 +82,115 @@ public class Manager_Anim_3 : MonoBehaviour
         }
     }
 
+    //그렇다면 이게 크게 의미가 없을듯?
+    //그냥 그때 그때 초기화해서 만들고 실행해도 크게 상관없을 것 같기도하고
+    //그냥 transform값만 전부 잘 가지고 있는걸로?
     void Init_Seq_fruit()
     {
         Fruit_pos_array = new GameObject[Fruit_position.transform.childCount];
-        Main_Fruit_array = new GameObject[Main_Fruit.transform.childCount];
-        Reveal_f_seq = new Sequence[Fruit_position.transform.childCount];
 
-        //hide, reveal 시퀀스 각각 한번씩 초기화
-        //메인 이동 동물 할당
+
+        F_p0 = new Transform[7]; //과일 게임 과일 위치
+        F_p1 = new Transform[5]; //박스내 과일 위치
+        F_p2 = new Transform[5]; //과일 읽기 과일 위치
+
         for (int i = 0; i < Fruit_position.transform.childCount; i++)
         {
             Fruit_pos_array[i] = Fruit_position.transform.GetChild(i).gameObject;
-            Main_Fruit_array[i] = Main_Fruit.transform.GetChild(i).gameObject;
-
-            Reveal_f_seq[i] = DOTween.Sequence().SetAutoKill(false);
-
-            Transform p0 = Fruit_pos_array[i].transform.GetChild(0).transform;
-            Transform p1 = Fruit_pos_array[i].transform.GetChild(1).transform;
-            Transform p2 = Fruit_pos_array[i].transform.GetChild(2).transform;
-            Transform p3 = Fruit_pos_array[i].transform.GetChild(3).transform;
-
-
-            //애니메이션을 조금 더 자연스럽게 만들 필요는 있음
-
-
-            Reveal_f_seq[i].Append(Main_Fruit_array[i].transform.DOMove(p2.position, 1f).SetEase(Ease.InOutQuad));
-            Reveal_f_seq[i].Join(Main_Fruit_array[i].transform.DORotate(p2.rotation.eulerAngles, 1f));
-            Reveal_f_seq[i].Append(Main_Fruit_array[i].transform.DOScale(p2.localScale, 1f).SetEase(Ease.InOutQuad));
-            Reveal_f_seq[i].Append(Main_Fruit_array[i].transform.DOMove(p3.position, 3f).SetEase(Ease.InOutQuad).SetDelay(5f));
-
-            Reveal_f_seq[i].Pause();
-
-
-            //Debug.Log("length " + Camera_seq.Length);
         }
+        //FP
+        F_p0[0] = Fruit_position.transform.GetChild(0);
+        F_p0[1] = Fruit_position.transform.GetChild(1);
+        F_p0[2] = Fruit_position.transform.GetChild(2);
+        F_p0[3] = Fruit_position.transform.GetChild(3);
+        F_p0[4] = Fruit_position.transform.GetChild(4);
+        F_p0[5] = Fruit_position.transform.GetChild(5);
+        F_p0[6] = Fruit_position.transform.GetChild(6);
+        F_p1[0] = Fruit_position.transform.GetChild(7);
+        F_p1[1] = Fruit_position.transform.GetChild(8);
+        F_p1[2] = Fruit_position.transform.GetChild(9);
+        F_p1[3] = Fruit_position.transform.GetChild(10);
+        F_p1[4] = Fruit_position.transform.GetChild(11);
+        F_p2[0] = Fruit_position.transform.GetChild(12);
+        F_p2[1] = Fruit_position.transform.GetChild(13);
+        F_p2[2] = Fruit_position.transform.GetChild(14);
+        F_p2[3] = Fruit_position.transform.GetChild(15);
+        F_p2[4] = Fruit_position.transform.GetChild(16);
+
+
+    }
+    void Init_Seq_box()
+    {
+
+        B_p0 = new Transform[5];  //박스 초기 위치 5개
+
+        Main_Box_array = new GameObject[Main_Box.transform.childCount];
+        Box_pos_array = new GameObject[Box_position.transform.childCount];
+
+        for (int i = 0; i < Box_position.transform.childCount; i++)
+        {
+            Box_pos_array[i] = Box_position.transform.GetChild(i).gameObject;
+        }
+
+        for (int i = 0; i < Main_Box.transform.childCount; i++)
+        {
+            Main_Box_array[i] = Main_Box.transform.GetChild(i).gameObject;
+        }
+        //BP
+        B_p0[0] = Box_position.transform.GetChild(0);
+        B_p0[1] = Box_position.transform.GetChild(1);
+        B_p0[2] = Box_position.transform.GetChild(2);
+        B_p0[3] = Box_position.transform.GetChild(3);
+        B_p0[4] = Box_position.transform.GetChild(4);
+        B_p1 = Box_position.transform.GetChild(5);
+        B_p2 = Box_position.transform.GetChild(6);
+
+    }
+    public void Popup_fruit(GameObject fruit)
+    {
+        Sequence seq = DOTween.Sequence();
+
+        //2초 뒤 팝업 애니메이션 및 과일 활성화
+        seq.Append(fruit.transform.DOScale(1, 1f).From(0).SetEase(Ease.OutElastic).OnStart(() => fruit.SetActive(true))).SetDelay(2f);
+        //seq.Append(fruit.transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad));
     }
 
+    //해당하는 과일을 어느 포지션으로 이동할지
+    public void Jump_fruit(GameObject fruit, Transform pos)
+    {
+        Sequence seq = DOTween.Sequence();
 
-    void Move_Seq_camera()
+        seq.Append(fruit.transform.DOJump(pos.position, 1f, 1, 1f));
+        seq.Append(fruit.transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad));
+    }
+
+    public void Jump_box_bp1(int round)
+    {
+        Sequence seq = DOTween.Sequence();
+
+        seq.Append(Main_Box_array[round].transform.DOJump(B_p1.position, 1f, 1, 1f));
+        seq.Append(Main_Box_array[round].transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad));
+    }
+    public void Jump_box_bp0(int round)
+    {
+        Sequence seq = DOTween.Sequence();
+
+        //조금 시간 지난 다음에 점프하는 애니메이션
+        seq.Append(Main_Box_array[round].transform.DOJump(B_p0[round].position, 1f, 1, 1f)).SetDelay(3f);
+        seq.Join(Main_Box_array[round].transform.DOShakeScale(0.5f, 1, 10, 90, true).SetEase(Ease.OutQuad));
+        //seq.Append(Main_Box_array[round].transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad));
+
+    }
+    public void Move_box_bp2(int round)
+    {
+        Sequence seq = DOTween.Sequence();
+
+        //클릭한 후 지연시간 있고 바구니 이동하게됨
+        seq.Append(Main_Box_array[round].transform.DOMove(B_p2.position, 1f).SetEase(Ease.InOutQuad).SetDelay(5f));
+        //seq.Append(Main_Box_array[round].transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad));
+    }
+
+    public void Move_Seq_camera()
     {
         Camera_seq[Number_Camera_seq].Play();
         Number_Camera_seq++;
@@ -134,32 +214,43 @@ public class Manager_Anim_3 : MonoBehaviour
         plate.transform.DOScale(0, 1f).SetEase(Ease.OutElastic);
 
         //과일은 해당하는 포지션으로 점프해서 들어감
-        fruit.transform.DOJump(p1[Num].position, 1f, 1, 1f);
+        //fruit.transform.DOJump(p1[Num].position, 1f, 1, 1f);
     }
-    public void Inactive_Seq_fruit(GameObject fruit)
+    public void Inactive_Seq_fruit(GameObject fruit, float timer)
     {
-        //색깔에 맞지 않는 과일일 경우
-        //애니메이션 재생하고 파괴함
-        fruit.transform.DOScale(0, 1f).SetEase(Ease.OutElastic).OnComplete(()=> Destroy(fruit));
+        //뭔가 과일이 사라지는게 조금 늦은 것 같은 기분
+        if (timer != 0f)
+        {
+            fruit.transform.DOScale(0, 0.5f).SetEase(Ease.InOutQuint).OnComplete(() => Destroy(fruit)).SetDelay(timer);
+        }
+        else
+        {
+            fruit.transform.DOScale(0, 0.5f).SetEase(Ease.InOutQuint).OnComplete(() => Destroy(fruit));
+        }
     }
-
-    public void Reveal_Seq_animal(int Num)
+    public void Devide_Seq_fruit(GameObject plate_Fruit,int number)
     {
-        Reveal_f_seq[Num].Play();
+        //접시는 비활성화 또는 파괴
+        //과일은 바구니 안으로//과일접시에서 과일, 접시 분해 후 각각 애니메이션 재생
+        GameObject plate = plate_Fruit.transform.GetChild(0).gameObject;
+        GameObject fruit = plate_Fruit.transform.GetChild(1).gameObject;
+
+        //접시는 사라지고
+        plate.transform.DOScale(0, 1f).SetEase(Ease.OutElastic);
+
+        Jump_fruit(fruit, F_p1[number]);
     }
 
-
-    public void Reveal_All_animal()
+    public void Move_Seq_box(int Round)
     {
-        Reveal_f_seq[0].Play();
-        Reveal_f_seq[1].Play();
-        Reveal_f_seq[2].Play();
-        Reveal_f_seq[3].Play();
-        Reveal_f_seq[4].Play();
-        Reveal_f_seq[5].Play();
-        Reveal_f_seq[6].Play();
+        //해당 하는 라운드의 바구니를 p1으로 이동
+
     }
 
+    public Transform Get_Fp0(int num)
+    {
+        return F_p0[num];
+    }
 
     public void Change_Animation(int Number_seq)
     {
@@ -170,6 +261,8 @@ public class Manager_Anim_3 : MonoBehaviour
             //Debug.Log("SEQ = " + Content_Seq);
         }
     }
+
+
 
     //public void Shake_Seq_sleigh()
     //{

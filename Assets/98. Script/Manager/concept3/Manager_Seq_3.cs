@@ -27,16 +27,16 @@ public class Manager_Seq_3 : MonoBehaviour
     //과일 게임
     public enum FruitColor
     {
-        Red, Orange, Yellow, Green, Purple
+        Red, Purple, Green, Orange, Yellow
     }
 
     public enum Fruit
     {
         Strawberry, Apple, Tomato, Cherry,
-        Carrot, Pumpkin, Orange, Onion,
-        Banana, Lemon, Corn, Pineapple,
+        Grapes, Blueberry, Eggplant, Beetroot,
         Watermelon, Cucumber, Avocado, GreenOnion,
-        Grapes, Blueberry, Eggplant, Beetroot
+        Carrot, Pumpkin, Orange, Onion,
+        Banana, Lemon, Corn, Pineapple
     }
 
     //과일의 경우 프리팹으로 무조건 생성이 되는 걸로하고
@@ -47,12 +47,17 @@ public class Manager_Seq_3 : MonoBehaviour
     // Ex) Orange, Carrot -> 1,0
     public GameObject[] fruitPrefabs; // 과일 프리팹
 
-    private GameObject Box;
+    private GameObject Main_Box;
+    private GameObject Boxgroups;
+
+
+    private GameObject[] Main_Box_array;
     private GameObject Fruitgroups; //테이블에 있는 과일 parent
+
     private List<int> currentFruits = new List<int>(); // 현재 테이블 위 과일 색깔 리스트
-    private List<List<int>> selectedFruits = new List<List<int>>(); // 선택된 과일 리스트
-    private FruitColor mainColor; // 메인 색깔
-    private int selectedFruitCount = 0;
+    //private List<List<int>> selectedFruits = new List<List<int>>(); // 선택된 과일 리스트
+    public FruitColor mainColor; // 메인 색깔
+    public int selectedFruitCount = 0;
 
     private int round = 0; // 현재 게임 회차
     private int maxRounds = 5; // 게임의 최대 회차
@@ -86,6 +91,17 @@ public class Manager_Seq_3 : MonoBehaviour
         Manager_Narr = this.gameObject.GetComponent<Manager_Narr>();
 
         Eventsystem = Manager_obj_3.instance.Eventsystem;
+        Main_Box = Manager_obj_3.instance.Main_Box;
+
+        Main_Box_array = new GameObject[Main_Box.transform.childCount];
+
+        for (int i = 0; i < Main_Box.transform.childCount; i++)
+        {
+            //현재 있는 과일 전부 삭제
+            //모든 바구니 할당 받았고
+            //순서대로 R - P -G -O -Y
+            Main_Box_array[i] = Main_Box.transform.GetChild(i).gameObject;
+        }
     }
 
     // Update is called once per frame
@@ -97,11 +113,15 @@ public class Manager_Seq_3 : MonoBehaviour
             if (toggle == true)
             {
                 toggle = false;
+                //Init_Game_fruit((int)FruitColor.Red);
+
                 Act();
                 //Debug.Log("timer done");
+
             }
         }
     }
+
 
     //최초로 콘텐츠 실행할 때 인트로 한 다음부터 이게 돌아가게끔 전부 수정 필요
 
@@ -115,31 +135,55 @@ public class Manager_Seq_3 : MonoBehaviour
         //1,3,5,7,9 과일 담기 게임
         //2,4,6,8,10 게임 종료 후 텍스트
         //12 ~ 16 과일 읽어주는 게임
-        if (Content_Seq == 1)
+
+        if (Content_Seq == 0)
         {
             Init_Game_fruit((int)FruitColor.Red);
-            StartCoroutine(ResetAfterTime(7f)); // 7초 후에 재설정
+            Eventsystem.SetActive(false);
+
+            Content_Seq += 1;
+            toggle = true;
+            Timer_set();
+        }
+        else if (Content_Seq == 1)
+        {
+            //여기에서 터치 활성화
+            Eventsystem.SetActive(true);
         }
         else if (Content_Seq == 3)
         {
             Init_Game_fruit((int)FruitColor.Orange);
-            StartCoroutine(ResetAfterTime(7f)); // 7초 후에 재설정
+            Eventsystem.SetActive(true);
+            //StartCoroutine(ResetAfterTime(7f)); // 7초 후에 재설정
         }
         else if (Content_Seq == 5)
         {
             Init_Game_fruit((int)FruitColor.Yellow);
-            StartCoroutine(ResetAfterTime(7f)); // 7초 후에 재설정
+            Eventsystem.SetActive(true);
+            //StartCoroutine(ResetAfterTime(7f)); // 7초 후에 재설정
         }
         else if (Content_Seq == 7)
         {
             Init_Game_fruit((int)FruitColor.Green);
-            StartCoroutine(ResetAfterTime(7f)); // 7초 후에 재설정
+            Eventsystem.SetActive(true);
+            //StartCoroutine(ResetAfterTime(7f)); // 7초 후에 재설정
         }
         else if (Content_Seq == 9)
         {
             Init_Game_fruit((int)FruitColor.Purple);
-            StartCoroutine(ResetAfterTime(7f)); // 7초 후에 재설정
+            Eventsystem.SetActive(true);
+            //StartCoroutine(ResetAfterTime(7f)); // 7초 후에 재설정
         }
+        else if (Content_Seq == 2 || Content_Seq == 4 || Content_Seq == 6 || Content_Seq == 8 || Content_Seq == 10)
+        {
+            End_Game_fruit();
+            Eventsystem.SetActive(false);
+
+            Content_Seq += 1;
+            toggle = true;
+            Timer_set();
+        }
+
         else if (Content_Seq == 12 || Content_Seq == 13 || Content_Seq == 14 || Content_Seq == 15 || Content_Seq == 16)
         {
 
@@ -165,48 +209,46 @@ public class Manager_Seq_3 : MonoBehaviour
 
     void Init_Game_fruit(int colorIndex)
     {
+        //박스도 추적해서 따라가야함
         mainColor = (FruitColor)colorIndex;
 
+        Manager_Anim.Jump_box_bp1(round);
+        //위 과정이 끝나야 아래가 진행
 
-        // 7번 실행해서 과일 색깔 리스트 설정
-        currentFruits.Clear();
-        currentFruits.AddRange(GenerateFruitList(colorIndex));
-
-        // 테이블에 과일 인스턴스화
-        for (int i = 0; i < currentFruits.Count; i++)
-        {
-            //인스턴스화 해놓은걸 내가 관리?
-            Instantiate(Box, Box, fruitPrefabs[currentFruits[i]]);
-        }
-    }
-    List<int> GenerateFruitList(int colorIndex)
-    {
-        List<int> fruitList = new List<int>();
-
-        fruitList.Add(colorIndex * 4 + UnityEngine.Random.Range(0, 4)); // 메인 색깔에서 랜덤으로 2개 추가
-        fruitList.Add(colorIndex * 4 + UnityEngine.Random.Range(0, 4)); 
+        //메인 색깔에서 2개
+        Generate_fruit(colorIndex * 4 + UnityEngine.Random.Range(0, 4), 0);
+        Generate_fruit(colorIndex * 4 + UnityEngine.Random.Range(0, 4), 1);
 
         for (int i = 0; i < 5; i++)
         {
-            int randomColor = UnityEngine.Random.Range(0, 5);
-            fruitList.Add(randomColor * 4 + UnityEngine.Random.Range(0, 4)); // 다른 색깔에서 랜덤으로 추가
+            //전체 랜덤으로 5개
+            Generate_fruit(UnityEngine.Random.Range(0, 16), i + 2);
         }
-        return fruitList;
     }
 
-    // 과일 클릭 후 처리
-    public void Click(int fruitIndex, GameObject plate_Fruit)
+    void End_Game_fruit()
     {
-        // 선택한 과일 번호 저장
-        int selectedFruit = fruitIndex;
+        Manager_Anim.Jump_box_bp0(round);
+        Inactive_All_fruit();
 
-        // 메인 색깔 과일을 선택한 경우
-        if (selectedFruit / 4 == (int)mainColor)
+        round += 1;
+    }
+
+    //과일 고르면 제대로 안 없어지거나, 클론이 많거나
+    public void Click(GameObject plate_Fruit, int num_fruit, int num_table)
+    {
+        
+        if (num_fruit / 4 == (int)mainColor)
         {
-            selectedFruits.Add(new List<int> { selectedFruit });
-
             //현재 테이블에 있는 과일 중에 해당 과일 삭제
-            Manager_Anim.Inactive_Seq_fruit(plate_Fruit);
+            Manager_Anim.Devide_Seq_fruit(plate_Fruit, selectedFruitCount);
+            plate_Fruit.transform.SetSiblingIndex(selectedFruitCount);
+            //여기에서 해당 과일 오브젝트 인덱스 올림
+            Manager_Text.Changed_UI_message_c3(num_table, num_fruit);
+            //해당 하는 과일, 채소 텍스트, 나레이션도 나와야함
+
+            //그냥 전체 랜덤으로 하나 다시 추가
+            Generate_fruit(UnityEngine.Random.Range(0, 16), num_table);
 
             selectedFruitCount++;
 
@@ -214,32 +256,51 @@ public class Manager_Seq_3 : MonoBehaviour
             if (selectedFruitCount == 5)
             {
                 Debug.Log("선택된 과일 5개 완료!");
+                //여기에서 다음으로 바로 넘어갔으면 좋겠는데?
                 selectedFruitCount = 0; // 초기화
-
-                //모든 과일 초기화
-                Inactive_All_fruit();
 
                 Content_Seq += 1;
                 toggle = true;
-                Timer_set();
             }
         }
+        //메인 색깔에서 고르지 않은 경우
         else
         {
-            // 다른 색깔 과일을 선택한 경우 해당 과일만 애니메이션
-            Manager_Anim.Inactive_Seq_fruit(plate_Fruit);
+            //현재 테이블에 있는 과일 중에 해당 과일 삭제
+            Manager_Anim.Inactive_Seq_fruit(plate_Fruit,0f);
+
+            //메인 색깔에서 랜덤
+            Generate_fruit((int)mainColor * 4 + UnityEngine.Random.Range(0, 4), num_table);
+
         }
     }
 
-    void Inactive_All_fruit()
+    public void Inactive_All_fruit()
     {
-        for (int i =0;i< Fruitgroups.transform.childCount; i++)
+        for (int i =5;i< Main_Box_array[round].transform.childCount; i++)
         {
-            //현재 있는 과일 전부 삭제
-            GameObject fruit = Fruitgroups.transform.GetChild(i).gameObject;
-            Manager_Anim.Inactive_Seq_fruit(fruit);
+            GameObject fruit = Main_Box_array[round].transform.GetChild(i).gameObject;
+            Manager_Anim.Inactive_Seq_fruit(fruit,2f);
         }
     }
+    
+    void Generate_fruit(int num_fruit, int num_table)
+    {
+        //과일을 비활성화 인채로 받아오고 팝업 애니메이션에서 활성화함
+        Transform pos = Manager_Anim.Get_Fp0(num_table);
+        Transform fruit_group = Manager_obj_3.instance.Fruit_position.transform;
+
+        GameObject fruit = Instantiate(Manager_obj_3.instance.Fruit_prefabs[num_fruit]);
+        fruit.transform.SetParent(Main_Box_array[round].transform);
+        fruit.transform.localPosition = pos.localPosition;
+
+        fruit.GetComponent<Clicked_fruit>().Set_Number_fruit(num_fruit);
+        fruit.GetComponent<Clicked_fruit>().Set_Number_table(num_table);
+
+        Manager_Anim.Popup_fruit(fruit);
+    }
+
+
 
     IEnumerator ResetAfterTime(float time)
     {
