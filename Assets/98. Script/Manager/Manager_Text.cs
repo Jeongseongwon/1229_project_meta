@@ -107,6 +107,7 @@ public class Manager_Text : MonoBehaviour
         UI_Message_array[Number].GetComponent<AudioSource>().clip = Manager_obj_3.instance.Fruit_narration[Target_num];
         UI_Message_array[Number].SetActive(true);
         UI_Message_array[Number].transform.DOScale(1, 1f).From(0).SetEase(Ease.OutElastic);
+        UI_Message_array[Number].transform.DOScale(0, 1f).From(1).SetEase(Ease.OutElastic).SetDelay(2f);
 
         //금방 비활성화 해야함
 

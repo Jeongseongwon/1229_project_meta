@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using static Manager_Seq_3;
+using static UnityEditor.PlayerSettings;
 
 public class Manager_Anim_3 : MonoBehaviour
 {
@@ -21,6 +23,10 @@ public class Manager_Anim_3 : MonoBehaviour
     private GameObject Main_Box;
     private GameObject[] Main_Box_array;
     private GameObject Box_position;
+
+
+    private GameObject Selected_fruit;
+    private int fruit_number;
 
     //p0 그룹 7개
     //p1 그룹 5개
@@ -156,12 +162,21 @@ public class Manager_Anim_3 : MonoBehaviour
     }
 
     //해당하는 과일을 어느 포지션으로 이동할지
-    public void Jump_fruit(GameObject fruit, Transform pos)
+    public void Jump_fruit(GameObject fruit, Transform pos, float timer)
     {
         Sequence seq = DOTween.Sequence();
 
-        seq.Append(fruit.transform.DOJump(pos.position, 1f, 1, 1f));
-        seq.Append(fruit.transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad));
+        if (timer != 0f)
+        {
+            seq.Append(fruit.transform.DOJump(pos.position, 1f, 1, 1f)).SetDelay(timer);
+            seq.Append(fruit.transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad));
+        }
+        else
+        {
+            seq.Append(fruit.transform.DOJump(pos.position, 1f, 1, 1f));
+            seq.Append(fruit.transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad));
+        }
+
     }
 
     public void Jump_box_bp1(int round)
@@ -178,6 +193,9 @@ public class Manager_Anim_3 : MonoBehaviour
         //조금 시간 지난 다음에 점프하는 애니메이션
         seq.Append(Main_Box_array[round].transform.DOJump(B_p0[round].position, 1f, 1, 1f)).SetDelay(3f);
         seq.Join(Main_Box_array[round].transform.DOShakeScale(0.5f, 1, 10, 90, true).SetEase(Ease.OutQuad));
+        seq.Append(Main_Box_array[round].transform.DOScale(B_p0[round].localScale, 1f));
+
+
         //seq.Append(Main_Box_array[round].transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad));
 
     }
@@ -185,9 +203,18 @@ public class Manager_Anim_3 : MonoBehaviour
     {
         Sequence seq = DOTween.Sequence();
 
-        //클릭한 후 지연시간 있고 바구니 이동하게됨
-        seq.Append(Main_Box_array[round].transform.DOMove(B_p2.position, 1f).SetEase(Ease.InOutQuad).SetDelay(5f));
-        //seq.Append(Main_Box_array[round].transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad));
+        if (round != 0)
+        {
+            //직전 바구니를 집어넣어주고 그 다음에 지금 순번 바구니를 꺼냄
+            seq.Append(Main_Box_array[round - 1].transform.DOMove(B_p0[round - 1].position, 1f).SetEase(Ease.InOutQuad));
+            seq.Append(Main_Box_array[round].transform.DOMove(B_p2.position, 1f).SetEase(Ease.InOutQuad));
+        }
+        else
+        {
+            seq.Append(Main_Box_array[round].transform.DOMove(B_p2.position, 1f).SetEase(Ease.InOutQuad));
+        }
+
+        seq.Join(Main_Box_array[round].transform.DOScale(B_p2.localScale, 1f));
     }
 
     public void Move_Seq_camera()
@@ -196,29 +223,10 @@ public class Manager_Anim_3 : MonoBehaviour
         Number_Camera_seq++;
         //Debug.Log("C_SEQ = " + Number_Camera_seq);
     }
-
-    //이번에는 해당 오브젝트를 받아오고 그 오브젝트를 사전 정의되있는 위치로 이동하거나
-    //세팅해서 이동 시키거나
-
-    //해당 하는 물체를 받아옴
-    //이동해야할 포지션 2개를 받아오고
-    //해당 포지션에 맞춰서 이동
-
-    public void In_Seq_fruit(int Num, GameObject plate_Fruit)
-    {
-        //과일접시에서 과일, 접시 분해 후 각각 애니메이션 재생
-        GameObject plate = plate_Fruit.transform.GetChild(0).gameObject;
-        GameObject fruit = plate_Fruit.transform.GetChild(1).gameObject;
-
-        //접시는 사라지고
-        plate.transform.DOScale(0, 1f).SetEase(Ease.OutElastic);
-
-        //과일은 해당하는 포지션으로 점프해서 들어감
-        //fruit.transform.DOJump(p1[Num].position, 1f, 1, 1f);
-    }
     public void Inactive_Seq_fruit(GameObject fruit, float timer)
     {
         //뭔가 과일이 사라지는게 조금 늦은 것 같은 기분
+        //(이슈) 과일이 마지막에 한번에 사라지는 거랑 직전에 메인 색깔 과일 사라지게 하는거랑 묘하게 충돌 발생하는 것 같음
         if (timer != 0f)
         {
             fruit.transform.DOScale(0, 0.5f).SetEase(Ease.InOutQuint).OnComplete(() => Destroy(fruit)).SetDelay(timer);
@@ -238,12 +246,48 @@ public class Manager_Anim_3 : MonoBehaviour
         //접시는 사라지고
         plate.transform.DOScale(0, 1f).SetEase(Ease.OutElastic);
 
-        Jump_fruit(fruit, F_p1[number]);
+        Jump_fruit(fruit, F_p1[number],0f);
     }
 
-    public void Move_Seq_box(int Round)
+    public void Read_Seq_fruit(int round)
     {
-        //해당 하는 라운드의 바구니를 p1으로 이동
+        GameObject Selected_fruit;
+        int fruit_number;
+
+        //빨간색 나온 다음
+        //3초 기다리고
+        //점프, 텍스트
+        //3초 기다리고
+        //점프, 텍스트
+        //3초 기다리고
+        //점프, 텍스트
+        //3초 기다리고
+        //점프, 텍스트
+        //3초 기다리고
+        //점프, 텍스트
+
+
+        for (int i = 0; i < 5; i++)
+        {
+            Selected_fruit = Main_Box_array[round].transform.GetChild(i).gameObject;
+            fruit_number = Selected_fruit.GetComponent<Clicked_fruit>().Number_fruit;
+
+            Jump_fruit(Selected_fruit, Get_Fp2(i), 1.5f);
+            Manager_Text.Changed_UI_message_c3(i + 7, fruit_number);
+        }
+        Sequence seq = DOTween.Sequence();
+
+
+        seq.Append(Main_Box_array[round].transform.GetChild(0).transform.DOJump(F_p2[round].position, 1f, 1, 1f)).SetDelay(2f);
+        seq.Append(Main_Box_array[round].transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad)).OnComplete(() =>
+            Manager_Text.Changed_UI_message_c3(i + 7, fruit_number);
+        
+        );
+
+    }
+
+    void Read_func()
+    {
 
     }
 
@@ -252,10 +296,15 @@ public class Manager_Anim_3 : MonoBehaviour
         return F_p0[num];
     }
 
+    public Transform Get_Fp2(int num)
+    {
+        return F_p2[num];
+    }
+
     public void Change_Animation(int Number_seq)
     {
         Content_Seq = Number_seq;
-        if (Content_Seq == 1 || Content_Seq == 3 || Content_Seq == 5)
+        if (Content_Seq == 11 || Content_Seq == 12)
         {
             Move_Seq_camera();
             //Debug.Log("SEQ = " + Content_Seq);

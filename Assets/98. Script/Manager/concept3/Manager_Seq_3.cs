@@ -20,9 +20,6 @@ public class Manager_Seq_3 : MonoBehaviour
 
     private bool toggle = true;
 
-    //동물 그룹
-    private int On_game;
-
 
     //과일 게임
     public enum FruitColor
@@ -129,13 +126,12 @@ public class Manager_Seq_3 : MonoBehaviour
     {
         Manager_Text.Change_UI_text(Content_Seq);
         Manager_Narr.Change_Audio_narr(Content_Seq);
-        //Manager_Anim.Change_Animation(Content_Seq);
+        Manager_Anim.Change_Animation(Content_Seq);
 
 
         //1,3,5,7,9 과일 담기 게임
         //2,4,6,8,10 게임 종료 후 텍스트
         //12 ~ 16 과일 읽어주는 게임
-
         if (Content_Seq == 0)
         {
             Init_Game_fruit((int)FruitColor.Red);
@@ -183,10 +179,17 @@ public class Manager_Seq_3 : MonoBehaviour
             toggle = true;
             Timer_set();
         }
+        else if (Content_Seq == 11)
+        {
+            Init_Game_read();
 
+            Content_Seq += 1;
+            toggle = true;
+            Timer_set();
+        }
         else if (Content_Seq == 12 || Content_Seq == 13 || Content_Seq == 14 || Content_Seq == 15 || Content_Seq == 16)
         {
-
+            Read_fruit(round);
         }
         else
         {
@@ -198,8 +201,8 @@ public class Manager_Seq_3 : MonoBehaviour
     void Init_Game_read()
     {
         //과일 읽어주기
-        Eventsystem.SetActive(true);
-        On_game = 0;
+        round = 0;
+        Eventsystem.SetActive(false);
     }
     void Timer_set()
     {
@@ -233,6 +236,33 @@ public class Manager_Seq_3 : MonoBehaviour
 
         round += 1;
     }
+    void Read_fruit(int round)
+    {
+        //첫번째가 아니라면 바구니 바꾸는 애니메이션 필요
+        //해당 바구니 앞으로 밀어내고
+        Manager_Anim.Move_box_bp2(round);
+
+        GameObject Selected_fruit; 
+        int fruit_number;
+
+        //빨간색 나온 다음
+        //3초 기다리다가
+        //아래 for문 실행
+        for (int i = 0; i < 5; i++)
+        {
+            DOVirtual.DelayedCall();
+
+
+            Selected_fruit = Main_Box_array[round].transform.GetChild(i).gameObject;
+            fruit_number = Selected_fruit.GetComponent<Clicked_fruit>().Number_fruit;
+
+            Manager_Anim.Jump_fruit(Selected_fruit, Manager_Anim.Get_Fp2(i), 1.5f);
+            Manager_Text.Changed_UI_message_c3(i + 7, fruit_number);
+        }
+
+        round += 1;
+    }
+
 
     //과일 고르면 제대로 안 없어지거나, 클론이 많거나
     public void Click(GameObject plate_Fruit, int num_fruit, int num_table)
