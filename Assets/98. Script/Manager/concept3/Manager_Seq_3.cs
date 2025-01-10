@@ -128,7 +128,6 @@ public class Manager_Seq_3 : MonoBehaviour
         Manager_Narr.Change_Audio_narr(Content_Seq);
         Manager_Anim.Change_Animation(Content_Seq);
 
-
         //1,3,5,7,9 과일 담기 게임
         //2,4,6,8,10 게임 종료 후 텍스트
         //12 ~ 16 과일 읽어주는 게임
@@ -191,6 +190,12 @@ public class Manager_Seq_3 : MonoBehaviour
         {
             Read_fruit(round);
         }
+        else if (Content_Seq == 17)
+        {
+            Manager_Anim.Jump_box_bp0(4);
+            //마지막으로 카메라 시점 다시 위로 올리고
+            //마지막 상자 원위치
+        }
         else
         {
             Content_Seq += 1;
@@ -238,31 +243,25 @@ public class Manager_Seq_3 : MonoBehaviour
     }
     void Read_fruit(int round)
     {
-        //첫번째가 아니라면 바구니 바꾸는 애니메이션 필요
-        //해당 바구니 앞으로 밀어내고
         Manager_Anim.Move_box_bp2(round);
-
-        GameObject Selected_fruit; 
-        int fruit_number;
-
-        //빨간색 나온 다음
-        //3초 기다리다가
-        //아래 for문 실행
-        for (int i = 0; i < 5; i++)
-        {
-            DOVirtual.DelayedCall();
-
-
-            Selected_fruit = Main_Box_array[round].transform.GetChild(i).gameObject;
-            fruit_number = Selected_fruit.GetComponent<Clicked_fruit>().Number_fruit;
-
-            Manager_Anim.Jump_fruit(Selected_fruit, Manager_Anim.Get_Fp2(i), 1.5f);
-            Manager_Text.Changed_UI_message_c3(i + 7, fruit_number);
-        }
-
-        round += 1;
+        Manager_Anim.Read_Seq_fruit(round);
     }
 
+
+    public void Reset_Game_read()
+    {
+        //전부 바구니로 이동
+        for (int i = 0; i < 5; i++)
+        {
+            GameObject fruit = Main_Box_array[round].transform.GetChild(i).gameObject;
+            Manager_Anim.Devide_Seq_fruit(fruit, i);
+        }
+
+        Content_Seq += 1;
+        toggle = true;
+        Timer_set();
+        round += 1;
+    }
 
     //과일 고르면 제대로 안 없어지거나, 클론이 많거나
     public void Click(GameObject plate_Fruit, int num_fruit, int num_table)
@@ -304,7 +303,7 @@ public class Manager_Seq_3 : MonoBehaviour
 
         }
     }
-
+    //다시 모으는게 제대로 동작하지 않음
     public void Inactive_All_fruit()
     {
         for (int i =5;i< Main_Box_array[round].transform.childCount; i++)

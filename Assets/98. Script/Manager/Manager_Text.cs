@@ -109,6 +109,7 @@ public class Manager_Text : MonoBehaviour
         UI_Message_array[Number].transform.DOScale(1, 1f).From(0).SetEase(Ease.OutElastic);
         UI_Message_array[Number].transform.DOScale(0, 1f).From(1).SetEase(Ease.OutElastic).SetDelay(2f);
 
+        Debug.Log("텍스트");
         //금방 비활성화 해야함
 
         Number_Prev_message = Number;

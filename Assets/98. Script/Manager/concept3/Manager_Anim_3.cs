@@ -10,6 +10,8 @@ public class Manager_Anim_3 : MonoBehaviour
     //Common
     public int Content_Seq = 0;
 
+    private Manager_Text Manager_Text;
+
     //Camera
     private GameObject Main_Camera;
     private GameObject Camera_position;
@@ -27,6 +29,8 @@ public class Manager_Anim_3 : MonoBehaviour
 
     private GameObject Selected_fruit;
     private int fruit_number;
+    private int round_number;
+    private int Box_number;
 
     //p0 그룹 7개
     //p1 그룹 5개
@@ -60,6 +64,8 @@ public class Manager_Anim_3 : MonoBehaviour
         Fruit_position = Manager_obj_3.instance.Fruit_position;
         Box_position = Manager_obj_3.instance.Box_position;
         Main_Box = Manager_obj_3.instance.Main_Box;
+
+        Manager_Text = this.gameObject.GetComponent<Manager_Text>();
 
         Init_Seq_camera();
         Init_Seq_fruit();
@@ -152,6 +158,14 @@ public class Manager_Anim_3 : MonoBehaviour
         B_p2 = Box_position.transform.GetChild(6);
 
     }
+
+    public void Move_Seq_camera()
+    {
+        Camera_seq[Number_Camera_seq].Play();
+        Number_Camera_seq++;
+        //Debug.Log("C_SEQ = " + Number_Camera_seq);
+    }
+
     public void Popup_fruit(GameObject fruit)
     {
         Sequence seq = DOTween.Sequence();
@@ -176,7 +190,6 @@ public class Manager_Anim_3 : MonoBehaviour
             seq.Append(fruit.transform.DOJump(pos.position, 1f, 1, 1f));
             seq.Append(fruit.transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad));
         }
-
     }
 
     public void Jump_box_bp1(int round)
@@ -207,6 +220,7 @@ public class Manager_Anim_3 : MonoBehaviour
         {
             //직전 바구니를 집어넣어주고 그 다음에 지금 순번 바구니를 꺼냄
             seq.Append(Main_Box_array[round - 1].transform.DOMove(B_p0[round - 1].position, 1f).SetEase(Ease.InOutQuad));
+            seq.Join(Main_Box_array[round - 1].transform.DOScale(B_p0[round - 1].localScale, 1f));
             seq.Append(Main_Box_array[round].transform.DOMove(B_p2.position, 1f).SetEase(Ease.InOutQuad));
         }
         else
@@ -215,13 +229,6 @@ public class Manager_Anim_3 : MonoBehaviour
         }
 
         seq.Join(Main_Box_array[round].transform.DOScale(B_p2.localScale, 1f));
-    }
-
-    public void Move_Seq_camera()
-    {
-        Camera_seq[Number_Camera_seq].Play();
-        Number_Camera_seq++;
-        //Debug.Log("C_SEQ = " + Number_Camera_seq);
     }
     public void Inactive_Seq_fruit(GameObject fruit, float timer)
     {
@@ -236,59 +243,57 @@ public class Manager_Anim_3 : MonoBehaviour
             fruit.transform.DOScale(0, 0.5f).SetEase(Ease.InOutQuint).OnComplete(() => Destroy(fruit));
         }
     }
-    public void Devide_Seq_fruit(GameObject plate_Fruit,int number)
+    public void Devide_Seq_fruit(GameObject plate_Fruit, int number)
     {
-        //접시는 비활성화 또는 파괴
-        //과일은 바구니 안으로//과일접시에서 과일, 접시 분해 후 각각 애니메이션 재생
+        //과일접시 옮기고 접시는 비활성화
         GameObject plate = plate_Fruit.transform.GetChild(0).gameObject;
-        GameObject fruit = plate_Fruit.transform.GetChild(1).gameObject;
-
-        //접시는 사라지고
         plate.transform.DOScale(0, 1f).SetEase(Ease.OutElastic);
+        plate.SetActive(false);
 
-        Jump_fruit(fruit, F_p1[number],0f);
+        Jump_fruit(plate_Fruit, F_p1[number], 0f);
     }
 
     public void Read_Seq_fruit(int round)
     {
-        GameObject Selected_fruit;
-        int fruit_number;
+        //(임시) 매니저 seq 3 호출함
+        //Sequence seq = DOTween.Sequence();
+        //this.transform.DOScale(1, 11f).OnComplete(() => Manager_Seq_3.instance.Reset_Game_read());
 
-        //빨간색 나온 다음
-        //3초 기다리고
-        //점프, 텍스트
-        //3초 기다리고
-        //점프, 텍스트
-        //3초 기다리고
-        //점프, 텍스트
-        //3초 기다리고
-        //점프, 텍스트
-        //3초 기다리고
-        //점프, 텍스트
-
-
-        for (int i = 0; i < 5; i++)
-        {
-            Selected_fruit = Main_Box_array[round].transform.GetChild(i).gameObject;
-            fruit_number = Selected_fruit.GetComponent<Clicked_fruit>().Number_fruit;
-
-            Jump_fruit(Selected_fruit, Get_Fp2(i), 1.5f);
-            Manager_Text.Changed_UI_message_c3(i + 7, fruit_number);
-        }
-        Sequence seq = DOTween.Sequence();
-
-
-        seq.Append(Main_Box_array[round].transform.GetChild(0).transform.DOJump(F_p2[round].position, 1f, 1, 1f)).SetDelay(2f);
-        seq.Append(Main_Box_array[round].transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad)).OnComplete(() =>
-            Manager_Text.Changed_UI_message_c3(i + 7, fruit_number);
-        
-        );
-
+        round_number = 0;
+        Box_number = round;
+        StartCoroutine(Temp_Message());
     }
 
-    void Read_func()
+    IEnumerator Temp_Message(float time=2f)
     {
+        if (round_number == 5)
+        {
+            Manager_Seq_3.instance.Reset_Game_read();
+            //여기에서 모든 과일 원위치 시키는 함수?
 
+            StopCoroutine(Temp_Message(time));
+        }
+        else {
+
+            yield return new WaitForSeconds(time);
+
+            GameObject Selected_fruit;
+            int fruit_number;
+
+            Sequence seq_read = DOTween.Sequence();
+
+            Selected_fruit = Main_Box_array[Box_number].transform.GetChild(round_number).gameObject;
+            fruit_number = Selected_fruit.GetComponent<Clicked_fruit>().Number_fruit;
+
+            //순서대로 진행됨
+            seq_read.Append(Selected_fruit.transform.DOJump(F_p2[round_number].position, 1f, 1, 1f));
+            seq_read.Append(Selected_fruit.transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad));
+
+            Manager_Text.Changed_UI_message_c3(round_number + 7, fruit_number); // 새 랜덤 색상으로 초기화
+            round_number += 1;
+
+            StartCoroutine(Temp_Message(time)); // 계속 반복
+        }
     }
 
     public Transform Get_Fp0(int num)
@@ -296,48 +301,18 @@ public class Manager_Anim_3 : MonoBehaviour
         return F_p0[num];
     }
 
-    public Transform Get_Fp2(int num)
-    {
-        return F_p2[num];
-    }
+    //public Transform [] Get_Fp2(int round)
+    //{
+    //    return F_p2[num];
+    //}
 
     public void Change_Animation(int Number_seq)
     {
         Content_Seq = Number_seq;
-        if (Content_Seq == 11 || Content_Seq == 12)
+        if (Content_Seq == 11 || Content_Seq == 12 || Content_Seq == 17)
         {
             Move_Seq_camera();
             //Debug.Log("SEQ = " + Content_Seq);
         }
     }
-
-
-
-    //public void Shake_Seq_sleigh()
-    //{
-    //    Sequence Shake = DOTween.Sequence();
-    //    Shake.Append(Sleigh.transform.DOShakeScale(1, 1, 10, 90, true).SetEase(Ease.OutQuad));
-    //    //Shake.Append(Sleigh.transform.DOShakePosition(1,1,10,1,false,true).SetEase(Ease.InOutQuad));
-    //    //흔들리는 애니메이션
-    //    //날아가는 애니메이션
-    //}
-
-    //public void Fly_Seq_sleigh()
-    //{
-    //    Sequence Fly = DOTween.Sequence();
-
-    //    Transform p1 = Sleigh_position.transform.GetChild(0).transform;
-    //    Transform p2 = Sleigh_position.transform.GetChild(1).transform;
-    //    Transform p3 = Sleigh_position.transform.GetChild(2).transform;
-
-
-    //    //펭귄 원상 복구 애니메이션
-    //    Fly.Append(Sleigh.transform.DOScale(new Vector3(0.7f, 0.7f, 0.7f), 1f).SetEase(Ease.InOutQuad));
-    //    Fly.Append(Sleigh.transform.DOMove(p1.transform.position, 1f).SetEase(Ease.InOutQuad));
-    //    Fly.Join(Sleigh.transform.DORotate(p1.transform.rotation.eulerAngles, 1f));
-    //    Fly.Append(Sleigh.transform.DOJump(p2.transform.position, 1f, 1, 1f));
-    //    Fly.Join(Sleigh.transform.DORotate(p2.transform.rotation.eulerAngles, 1f));
-    //    Fly.Append(Sleigh.transform.DOJump(p3.transform.position, 1f, 1, 1f));
-    //    Fly.Join(Sleigh.transform.DORotate(p3.transform.rotation.eulerAngles, 1f));
-    //}
 }
