@@ -1,0 +1,694 @@
+using System.Collections.Generic;
+
+public class DepthB_SceneController : Base_SceneController
+{
+    public bool isEvalStart; // 버튼UI 표출, 점수평가 시작등에 사용됩니다. 
+
+
+    private DepthB_CharacterAnimationController _workwearAnimator;
+    public DepthB_CharacterAnimationController workwearAnimator
+    {
+        get
+        {
+            if (_workwearAnimator == null)
+            {
+                _workwearAnimator = GetObject((int)DepthB_Objects.AccidentExampleAvatar_Workwear)
+                    .GetComponent<DepthB_CharacterAnimationController>();
+
+                return _workwearAnimator;
+            }
+
+            return _workwearAnimator;
+        }
+ 
+
+    }
+    public enum DepthB_Objects // for referring array or making it string
+    {
+        //Highlight X
+        //안전장구(캐릭터)
+        OnCharacter_Helmet , //체크리스트 인덱싱 편의를 위한 1 설정
+        OnCharacter_InsulatedGloves,
+        OnCharacter_Earplugs,
+        OnCharacter_Mask,
+        OnCharacter_ProtectiveGoggles,
+        OnCharacter_InsulatedShoes,
+        OnCharacter_FlameResistantClothing, //캐릭터위에 실제로 배치되어있지는 않음
+        Character_NoFlameSuit,
+        
+
+        //Highlight O
+        //안전장구(보관함)
+        Door_L,
+        Door_R,
+        OnStorage_Helmet,
+        OnStorage_InsulatedGloves,
+        OnStorage_Earplugs,
+        OnStorage_Mask,
+        OnStorage_ProtectiveGoggles,
+        OnStorage_InsulatedShoes,
+        OnStorage_FlameResistantClothing,
+        ElectronicDriver,
+        Multimeter,
+        Wrench,
+        Stripper,
+        PressureCalibrator,
+        
+        AccidentExampleAvatar_Workwear,
+    }
+
+    private enum ToolCheckList
+    {
+        ElectronicDriver =1,
+        Multimeter,
+        Wrench,
+        Stripper,
+        PressureCalibrator
+    }
+    private enum SafetyEquipmentCheckList
+    {
+        Helmet =1,
+        InsulatedGloves,
+        Earplugs,
+        Mask,
+        ProtectiveGoggles,
+        InsulatedShoes,
+        FlameResistantClothing,
+    }
+
+    protected override void SetObjectName()
+    {
+        ObjectNameMap = new Dictionary<int, ObjectTextData>
+        {
+            // Safety Gear (In Storage)
+            { (int)DepthB_Objects.Door_L, new ObjectTextData((int)DepthB_Objects.Door_L, "", "") },
+            { (int)DepthB_Objects.Door_R, new ObjectTextData((int)DepthB_Objects.Door_R, "", "") },
+            { (int)DepthB_Objects.OnStorage_Helmet, new ObjectTextData((int)DepthB_Objects.OnStorage_Helmet, "", "") },
+            {
+                (int)DepthB_Objects.OnStorage_InsulatedGloves,
+                new ObjectTextData((int)DepthB_Objects.OnStorage_InsulatedGloves, "", "")
+            },
+            {
+                (int)DepthB_Objects.OnStorage_Earplugs,
+                new ObjectTextData((int)DepthB_Objects.OnStorage_Earplugs, "", "")
+            },
+            { (int)DepthB_Objects.OnStorage_Mask, new ObjectTextData((int)DepthB_Objects.OnStorage_Mask, "", "") },
+            {
+                (int)DepthB_Objects.OnStorage_ProtectiveGoggles,
+                new ObjectTextData((int)DepthB_Objects.OnStorage_ProtectiveGoggles, "", "")
+            },
+            {
+                (int)DepthB_Objects.OnStorage_InsulatedShoes,
+                new ObjectTextData((int)DepthB_Objects.OnStorage_InsulatedShoes, "", "")
+            },
+            {
+                (int)DepthB_Objects.OnStorage_FlameResistantClothing,
+                new ObjectTextData((int)DepthB_Objects.OnStorage_FlameResistantClothing, "", "")
+            },
+
+            // Tools
+            { (int)DepthB_Objects.ElectronicDriver, new ObjectTextData((int)DepthB_Objects.ElectronicDriver, "", "") },
+            { (int)DepthB_Objects.Multimeter, new ObjectTextData((int)DepthB_Objects.Multimeter, "", "") },
+            { (int)DepthB_Objects.Wrench, new ObjectTextData((int)DepthB_Objects.Wrench, "", "") },
+            { (int)DepthB_Objects.Stripper, new ObjectTextData((int)DepthB_Objects.Stripper, "", "") },
+            {
+                (int)DepthB_Objects.PressureCalibrator,
+                new ObjectTextData((int)DepthB_Objects.PressureCalibrator, "", "")
+            }
+        };
+    }
+
+    protected override void BindHLForAllClickableObj()
+    {
+        SetObjectName();
+
+        // Bind Highlight O
+        BindHighlightWithEnum((int)DepthB_Objects.Door_L);
+        BindHighlightWithEnum((int)DepthB_Objects.Door_R);
+        BindHighlightWithEnum((int)DepthB_Objects.OnStorage_Helmet);
+        BindHighlightWithEnum((int)DepthB_Objects.OnStorage_InsulatedGloves);
+        BindHighlightWithEnum((int)DepthB_Objects.OnStorage_Earplugs);
+        BindHighlightWithEnum((int)DepthB_Objects.OnStorage_Mask);
+        BindHighlightWithEnum((int)DepthB_Objects.OnStorage_ProtectiveGoggles);
+        BindHighlightWithEnum((int)DepthB_Objects.OnStorage_InsulatedShoes);
+        BindHighlightWithEnum((int)DepthB_Objects.OnStorage_FlameResistantClothing);
+        BindHighlightWithEnum((int)DepthB_Objects.ElectronicDriver);
+        BindHighlightWithEnum((int)DepthB_Objects.Multimeter);
+        BindHighlightWithEnum((int)DepthB_Objects.Wrench);
+        BindHighlightWithEnum((int)DepthB_Objects.Stripper);
+        BindHighlightWithEnum((int)DepthB_Objects.PressureCalibrator);
+
+
+        SetHighlightIgnore((int)DepthB_Objects.Door_L, false);
+        SetHighlightIgnore((int)DepthB_Objects.Door_R, false);
+        SetHighlightIgnore((int)DepthB_Objects.OnStorage_Helmet, false);
+        SetHighlightIgnore((int)DepthB_Objects.OnStorage_InsulatedGloves, false);
+        SetHighlightIgnore((int)DepthB_Objects.OnStorage_Earplugs, false);
+        SetHighlightIgnore((int)DepthB_Objects.OnStorage_Mask, false);
+        SetHighlightIgnore((int)DepthB_Objects.OnStorage_ProtectiveGoggles, false);
+        SetHighlightIgnore((int)DepthB_Objects.OnStorage_InsulatedShoes, false);
+        SetHighlightIgnore((int)DepthB_Objects.OnStorage_FlameResistantClothing, false);
+        SetHighlightIgnore((int)DepthB_Objects.ElectronicDriver, false);
+        SetHighlightIgnore((int)DepthB_Objects.Multimeter, false);
+        SetHighlightIgnore((int)DepthB_Objects.Wrench, false);
+        SetHighlightIgnore((int)DepthB_Objects.Stripper, false);
+        SetHighlightIgnore((int)DepthB_Objects.PressureCalibrator, false);
+
+       
+    }
+
+    public void InitCheckList()
+    {
+        contentController.uiChecklist.Init();
+    }
+
+    private Dictionary<int, bool> _isClickedMap = new();
+    public const int TOTAL_EQUIPMENT_COUNT = 5;
+    public const int TOTAL_SAFETY_EQUIPMENT_COUNT = 6; //방염복제외 주의
+    private int _currentClickedToolCount;
+
+
+    public int currentClickedToolCount
+    {
+        get => _currentClickedToolCount;
+        set
+        {
+            _currentClickedToolCount = value;
+            if (Managers.ContentInfo.PlayData.Depth3 == 2 && _currentClickedToolCount >= TOTAL_EQUIPMENT_COUNT)
+                OnStepMissionComplete(animationNumber: 3);
+
+            _currentClickedToolCount = value;
+            if (Managers.ContentInfo.PlayData.Depth3 == 1 && _currentClickedToolCount >= TOTAL_SAFETY_EQUIPMENT_COUNT)
+                OnStepMissionComplete(animationNumber: 3);
+        }
+    }
+
+    protected override void OnDepth2ClickedAction()
+    {
+        base.OnDepth2ClickedAction();
+        TurnOffAllOnCharacter();
+    }
+
+
+    public override void Init()
+    {
+        SetDepthNum(); //개발용
+        base.Init();
+
+        SetMainProperties();
+        InitializeBStates();
+        BindObject(typeof(DepthB_Objects));
+        contentController.OnDepth2Init(1); // 함수명에 혼동의여지있으나, 로직은 동일하게 동작합니다. 
+        DepthB11Init();
+        BindHLForAllClickableObj();
+      
+        
+    }
+
+
+    public void TurnOffObjectOnCharacter(DepthB_Objects objOnCharacter = DepthB_Objects.OnCharacter_Helmet)
+    {
+        for (var i = (int)DepthB_Objects.OnCharacter_Helmet; i <= (int)objOnCharacter; i++)
+            GetObject(i).gameObject.SetActive(true);
+
+        for (var i = (int)objOnCharacter; i <= (int)DepthB_Objects.OnCharacter_FlameResistantClothing; i++)
+            GetObject(i).gameObject.SetActive(false);
+    }
+
+
+    public void TurnOffAllOnCharacter()
+    {
+        for (var i = (int)DepthB_Objects.OnCharacter_Helmet;
+             i <= (int)DepthB_Objects.OnCharacter_FlameResistantClothing;
+             i++) GetObject(i).gameObject.SetActive(false);
+    }
+
+    public void DepthB11Init()
+    {
+        
+        contentController.uiChecklist.Init();
+        
+        contentController.uiChecklist.UncheckAndInitList();
+        contentController.uiChecklist.RefreshText();
+        contentController.uiChecklist.Hide();
+        
+        
+        InitEquipmentSelectionPart();
+        
+        GetObject((int)DepthB_Objects.Door_L).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 1 && Managers.ContentInfo.PlayData.Count==2)
+            {
+                OnStepMissionComplete(animationNumber:2);
+            }
+        });
+        GetObject((int)DepthB_Objects.Door_R).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 1 && Managers.ContentInfo.PlayData.Count==2)
+            {
+                OnStepMissionComplete(animationNumber:2);
+            }
+        });
+        
+        
+        GetObject((int)DepthB_Objects.OnStorage_Helmet).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 1 && Managers.ContentInfo.PlayData.Count >= 3 &&!_isClickedMap[(int)DepthB_Objects.OnStorage_Helmet])
+            {
+                GetObject((int)DepthB_Objects.OnStorage_Helmet).SetActive(false);
+                GetObject((int)DepthB_Objects.OnCharacter_Helmet).SetActive(true);
+                _isClickedMap[(int)DepthB_Objects.OnStorage_Helmet] = true;
+                contentController.safetyCheckOnly_Tooltip.SetStatus(false);
+                contentController.uiChecklist.CheckSingleAndDeactivateColor((int)SafetyEquipmentCheckList.Helmet);
+                currentClickedToolCount++;
+            }
+        });
+        GetObject((int)DepthB_Objects.Character_NoFlameSuit).SetActive(true);
+        
+        
+        
+        //BindHighlight((int)DepthB_Objects.OnStorage_Helmet,"안전모");
+        GetObject((int)DepthB_Objects.OnStorage_Helmet).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 1 && Managers.ContentInfo.PlayData.Count >= 3 &&!_isClickedMap[(int)DepthB_Objects.OnStorage_Helmet])
+            {
+                GetObject((int)DepthB_Objects.OnStorage_Helmet).SetActive(false);
+                GetObject((int)DepthB_Objects.OnCharacter_Helmet).SetActive(true);
+                _isClickedMap[(int)DepthB_Objects.OnStorage_Helmet] = true;
+                contentController.safetyCheckOnly_Tooltip.SetStatus(false);
+                contentController.uiChecklist.CheckSingleAndDeactivateColor((int)SafetyEquipmentCheckList.Helmet);
+                currentClickedToolCount++;
+            }
+        });
+        GetObject((int)DepthB_Objects.OnStorage_Helmet).BindEvent(() =>
+        {
+            if (_isClickedMap[(int)DepthB_Objects.OnStorage_Helmet] || Managers.ContentInfo.PlayData.Count != 3) return;
+            contentController.safetyCheckOnly_Tooltip.SetStatus(true);
+            contentController.safetyCheckOnly_Tooltip.RefreshText(Define.Safety_Helmet);
+        }, Define.UIEvent.PointerEnter);
+        GetObject((int)DepthB_Objects.OnStorage_Helmet).BindEvent(
+            () => { contentController.safetyCheckOnly_Tooltip.SetStatus(false); }, Define.UIEvent.PointerExit);
+
+
+        
+        //BindHighlight((int)DepthB_Objects.OnStorage_InsulatedGloves,"절연 장갑");
+        GetObject((int)DepthB_Objects.OnStorage_InsulatedGloves).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 1 && Managers.ContentInfo.PlayData.Count >= 3 &&!_isClickedMap[(int)DepthB_Objects.OnStorage_InsulatedGloves])
+            {
+                GetObject((int)DepthB_Objects.OnStorage_InsulatedGloves).SetActive(false);
+                GetObject((int)DepthB_Objects.OnCharacter_InsulatedGloves).SetActive(true);
+                _isClickedMap[(int)DepthB_Objects.OnStorage_InsulatedGloves] = true;
+                contentController.uiChecklist.CheckSingleAndDeactivateColor((int)SafetyEquipmentCheckList.InsulatedGloves);
+                contentController.safetyCheckOnly_Tooltip.SetStatus(false);
+
+                currentClickedToolCount++;
+            }
+        });
+        GetObject((int)DepthB_Objects.OnStorage_InsulatedGloves).BindEvent(() =>
+        {
+            if (_isClickedMap[(int)DepthB_Objects.OnStorage_InsulatedGloves] || Managers.ContentInfo.PlayData.Count != 3) return;
+            contentController.safetyCheckOnly_Tooltip.SetStatus(true);
+            contentController.safetyCheckOnly_Tooltip.RefreshText(Define.Safety_InsulatedGloves);
+        }, Define.UIEvent.PointerEnter);
+        GetObject((int)DepthB_Objects.OnStorage_InsulatedGloves).BindEvent(
+            () => { contentController.safetyCheckOnly_Tooltip.SetStatus(false); }, Define.UIEvent.PointerExit);
+
+
+        
+        //BindHighlight((int)DepthB_Objects.OnStorage_Earplugs,"귀마개");
+        GetObject((int)DepthB_Objects.OnStorage_Earplugs).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 1 && Managers.ContentInfo.PlayData.Count >= 3 &&!_isClickedMap[(int)DepthB_Objects.OnStorage_Earplugs])
+            {
+                GetObject((int)DepthB_Objects.OnStorage_Earplugs).SetActive(false);
+                GetObject((int)DepthB_Objects.OnCharacter_Earplugs).SetActive(true);
+                _isClickedMap[(int)DepthB_Objects.OnStorage_Earplugs] = true;
+                contentController.safetyCheckOnly_Tooltip.SetStatus(false);
+                contentController.uiChecklist.CheckSingleAndDeactivateColor((int)SafetyEquipmentCheckList.Earplugs);
+                currentClickedToolCount++;
+            }
+        });
+        GetObject((int)DepthB_Objects.OnStorage_Earplugs).BindEvent(() =>
+        {
+            if (_isClickedMap[(int)DepthB_Objects.OnStorage_Earplugs] &&
+                Managers.ContentInfo.PlayData.Count!= 3) return;
+            contentController.safetyCheckOnly_Tooltip.SetStatus(true);
+            contentController.safetyCheckOnly_Tooltip.RefreshText(Define.Safety_EarPlugs);
+        }, Define.UIEvent.PointerEnter);
+        GetObject((int)DepthB_Objects.OnStorage_Earplugs).BindEvent(
+            () => { contentController.safetyCheckOnly_Tooltip.SetStatus(false); }, Define.UIEvent.PointerExit);
+
+
+        //BindHighlight((int)DepthB_Objects.OnStorage_Mask,"방진 마스크");
+        GetObject((int)DepthB_Objects.OnStorage_Mask).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 1 && Managers.ContentInfo.PlayData.Count == 3 &&
+                !_isClickedMap[(int)DepthB_Objects.OnStorage_Mask])
+            {
+                GetObject((int)DepthB_Objects.OnStorage_Mask).SetActive(false);
+                GetObject((int)DepthB_Objects.OnCharacter_Mask).SetActive(true);
+                _isClickedMap[(int)DepthB_Objects.OnStorage_Mask] = true;
+                
+                contentController.safetyCheckOnly_Tooltip.SetStatus(false);
+                
+                contentController.uiChecklist.CheckSingleAndDeactivateColor((int)SafetyEquipmentCheckList.Mask);
+                currentClickedToolCount++;
+            }
+        });
+        GetObject((int)DepthB_Objects.OnStorage_Mask).BindEvent(() =>
+        {
+            if (_isClickedMap[(int)DepthB_Objects.OnStorage_Mask] ||  Managers.ContentInfo.PlayData.Count != 3) return;
+            contentController.safetyCheckOnly_Tooltip.SetStatus(true);
+            contentController.safetyCheckOnly_Tooltip.RefreshText(Define.Safety_Mask);
+        }, Define.UIEvent.PointerEnter);
+        GetObject((int)DepthB_Objects.OnStorage_Mask).BindEvent(
+            () => { contentController.safetyCheckOnly_Tooltip.SetStatus(false); }, Define.UIEvent.PointerExit);
+
+
+        
+        
+        //BindHighlight((int)DepthB_Objects.OnStorage_ProtectiveGoggles,"보호안경");
+        GetObject((int)DepthB_Objects.OnStorage_ProtectiveGoggles).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 1 && Managers.ContentInfo.PlayData.Count == 3 &&
+                !_isClickedMap[(int)DepthB_Objects.OnStorage_ProtectiveGoggles])
+            {
+                GetObject((int)DepthB_Objects.OnStorage_ProtectiveGoggles).SetActive(false);
+                _isClickedMap[(int)DepthB_Objects.OnStorage_ProtectiveGoggles] = true;
+                GetObject((int)DepthB_Objects.OnCharacter_ProtectiveGoggles).SetActive(true);
+                
+                
+                contentController.safetyCheckOnly_Tooltip.SetStatus(false);
+                
+                contentController.uiChecklist.CheckSingleAndDeactivateColor((int)SafetyEquipmentCheckList.ProtectiveGoggles);
+
+                currentClickedToolCount++;
+            }
+        });
+        GetObject((int)DepthB_Objects.OnStorage_ProtectiveGoggles).BindEvent(() =>
+        {
+            if (_isClickedMap[(int)DepthB_Objects.OnStorage_ProtectiveGoggles] ||Managers.ContentInfo.PlayData.Count != 3) return;
+            contentController.safetyCheckOnly_Tooltip.SetStatus(true);
+            contentController.safetyCheckOnly_Tooltip.RefreshText(Define.Safety_ProtectiveGoggles);
+        }, Define.UIEvent.PointerEnter);
+        GetObject((int)DepthB_Objects.OnStorage_ProtectiveGoggles).BindEvent(
+            () => { contentController.safetyCheckOnly_Tooltip.SetStatus(false); }, Define.UIEvent.PointerExit);
+
+
+        //BindHighlight((int)DepthB_Objects.OnStorage_InsulatedShoes,"안전화");
+        GetObject((int)DepthB_Objects.OnStorage_InsulatedShoes).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 1 && Managers.ContentInfo.PlayData.Count == 3 && !_isClickedMap[(int)DepthB_Objects.OnStorage_InsulatedShoes])
+            {
+                GetObject((int)DepthB_Objects.OnStorage_InsulatedShoes).SetActive(false);
+                _isClickedMap[(int)DepthB_Objects.OnStorage_InsulatedShoes] = true;
+                GetObject((int)DepthB_Objects.OnCharacter_InsulatedShoes).SetActive(true);
+                
+                contentController.safetyCheckOnly_Tooltip.SetStatus(false);
+                
+                contentController.uiChecklist.CheckSingleAndDeactivateColor((int)SafetyEquipmentCheckList.InsulatedShoes);
+                currentClickedToolCount++;
+            }
+        });
+        GetObject((int)DepthB_Objects.OnStorage_InsulatedShoes).BindEvent(() =>
+        {
+            if (_isClickedMap[(int)DepthB_Objects.OnStorage_InsulatedShoes] ||Managers.ContentInfo.PlayData.Count != 3) return;
+
+            contentController.safetyCheckOnly_Tooltip.SetStatus(true);
+            contentController.safetyCheckOnly_Tooltip.RefreshText(Define.Safety_Shoes);
+        }, Define.UIEvent.PointerEnter);
+        GetObject((int)DepthB_Objects.OnStorage_InsulatedShoes).BindEvent(
+            () => { contentController.safetyCheckOnly_Tooltip.SetStatus(false); }, Define.UIEvent.PointerExit);
+
+
+        //BindHighlight((int)DepthB_Objects.OnStorage_FlameResistantClothing,"방염복");
+        GetObject((int)DepthB_Objects.OnStorage_FlameResistantClothing).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 1 && Managers.ContentInfo.PlayData.Count == 4 && !_isClickedMap[(int)DepthB_Objects.OnStorage_FlameResistantClothing])
+            {
+                GetObject((int)DepthB_Objects.OnStorage_FlameResistantClothing).SetActive(false);
+                GetObject((int)DepthB_Objects.OnCharacter_FlameResistantClothing).SetActive(true);
+                _isClickedMap[(int)DepthB_Objects.OnStorage_FlameResistantClothing] = true;
+                
+                contentController.safetyCheckOnly_Tooltip.SetStatus(false);
+                contentController.uiChecklist.CheckSingleAndDeactivateColor((int)SafetyEquipmentCheckList.FlameResistantClothing);
+                
+                GetObject((int)DepthB_Objects.Character_NoFlameSuit).SetActive(false);
+                currentClickedToolCount++;
+                OnStepMissionComplete(animationNumber: 4);
+            }
+        });
+        GetObject((int)DepthB_Objects.OnStorage_FlameResistantClothing).BindEvent(() =>
+        {
+            if (_isClickedMap[(int)DepthB_Objects.OnStorage_FlameResistantClothing] ||Managers.ContentInfo.PlayData.Count != 4) return;
+                contentController.safetyCheckOnly_Tooltip.SetStatus(true);
+            contentController.safetyCheckOnly_Tooltip.RefreshText(Define.Safety_FlameResistantSuit);
+        }, Define.UIEvent.PointerEnter);
+        GetObject((int)DepthB_Objects.OnStorage_FlameResistantClothing).BindEvent(
+            () => { contentController.safetyCheckOnly_Tooltip.SetStatus(false); }, Define.UIEvent.PointerExit);
+
+
+        TurnOffAllOnCharacter();
+        BindHLForAllClickableObj();
+    }
+
+    public void DepthB21Init()
+    {
+        InitEquipmentSelectionPart();
+
+        //BindHighlight((int)DepthB_Objects.ElectronicDriver,"전동 드라이버");
+
+        contentController.uiChecklist.Init();
+        
+        contentController.uiChecklist.UncheckAndInitList();
+        contentController.uiChecklist.RefreshText();
+        contentController.uiChecklist.Hide();
+        
+        GetObject((int)DepthB_Objects.ElectronicDriver).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 2 && Managers.ContentInfo.PlayData.Count == 3 &&
+                !_isClickedMap[(int)DepthB_Objects.ElectronicDriver])
+            {
+                GetObject((int)DepthB_Objects.ElectronicDriver).SetActive(false);
+                contentController.safetyCheckOnly_Tooltip.SetStatus(false);
+                contentController.uiChecklist.CheckSingleAndDeactivateColor((int)ToolCheckList.ElectronicDriver);
+                
+                _isClickedMap[(int)DepthB_Objects.ElectronicDriver] = true;
+                currentClickedToolCount++;
+            }
+        });
+        GetObject((int)DepthB_Objects.ElectronicDriver).BindEvent(() =>
+        {
+            contentController.safetyCheckOnly_Tooltip.SetStatus(true);
+            contentController.safetyCheckOnly_Tooltip.RefreshText(Define.Safety_ElectronicDriver);
+        }, Define.UIEvent.PointerEnter);
+        GetObject((int)DepthB_Objects.ElectronicDriver).BindEvent(
+            () => { contentController.safetyCheckOnly_Tooltip.SetStatus(false); }, Define.UIEvent.PointerExit);
+
+
+        //BindHighlight((int)DepthB_Objects.Multimeter,"멀티미터");
+        GetObject((int)DepthB_Objects.Multimeter).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 2 && Managers.ContentInfo.PlayData.Count == 3 &&
+                !_isClickedMap[(int)DepthB_Objects.Multimeter])
+            {
+                _isClickedMap[(int)DepthB_Objects.Multimeter] = true;
+                currentClickedToolCount++;
+                GetObject((int)DepthB_Objects.Multimeter).SetActive(false);
+                contentController.uiChecklist.CheckSingleAndDeactivateColor((int)ToolCheckList.Multimeter);
+                
+                contentController.safetyCheckOnly_Tooltip.SetStatus(false);
+            }
+        });
+        GetObject((int)DepthB_Objects.Multimeter).BindEvent(() =>
+        {
+            contentController.safetyCheckOnly_Tooltip.SetStatus(true);
+            contentController.safetyCheckOnly_Tooltip.RefreshText(Define.Safety_Multimeter);
+        }, Define.UIEvent.PointerEnter);
+        GetObject((int)DepthB_Objects.Multimeter).BindEvent(
+            () => { contentController.safetyCheckOnly_Tooltip.SetStatus(false); }, Define.UIEvent.PointerExit);
+
+
+        //BindHighlight((int)DepthB_Objects.Stripper,"스트리퍼");
+        GetObject((int)DepthB_Objects.Stripper).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 2 && Managers.ContentInfo.PlayData.Count == 3 &&
+                !_isClickedMap[(int)DepthB_Objects.Stripper])
+            {
+                _isClickedMap[(int)DepthB_Objects.Stripper] = true;
+                currentClickedToolCount++;
+                GetObject((int)DepthB_Objects.Stripper).SetActive(false);
+                
+                contentController.uiChecklist.CheckSingleAndDeactivateColor((int)ToolCheckList.Stripper);
+                contentController.safetyCheckOnly_Tooltip.SetStatus(false);
+            }
+        });
+        GetObject((int)DepthB_Objects.Stripper).BindEvent(() =>
+        {
+            contentController.safetyCheckOnly_Tooltip.SetStatus(true);
+            contentController.safetyCheckOnly_Tooltip.RefreshText(Define.Safety_Stripper);
+        }, Define.UIEvent.PointerEnter);
+        GetObject((int)DepthB_Objects.Stripper).BindEvent(
+            () => { contentController.safetyCheckOnly_Tooltip.SetStatus(false); }, Define.UIEvent.PointerExit);
+
+
+        
+        
+        
+        
+        //BindHighlight((int)DepthB_Objects.PressureCalibrator,"자동 압력 교정기");
+        GetObject((int)DepthB_Objects.PressureCalibrator).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 2 && Managers.ContentInfo.PlayData.Count == 3 &&
+                !_isClickedMap[(int)DepthB_Objects.PressureCalibrator])
+            {
+                _isClickedMap[(int)DepthB_Objects.PressureCalibrator] = true;
+                currentClickedToolCount++;
+                GetObject((int)DepthB_Objects.PressureCalibrator).SetActive(false);
+                contentController.safetyCheckOnly_Tooltip.SetStatus(false);
+                contentController.uiChecklist.CheckSingleAndDeactivateColor((int)ToolCheckList.PressureCalibrator);
+            }
+        });
+        GetObject((int)DepthB_Objects.PressureCalibrator).BindEvent(() =>
+        {
+            contentController.safetyCheckOnly_Tooltip.SetStatus(true);
+            contentController.safetyCheckOnly_Tooltip.RefreshText(Define.Safety_PressureCalibrator);
+        }, Define.UIEvent.PointerEnter);
+        GetObject((int)DepthB_Objects.PressureCalibrator).BindEvent(
+            () => { contentController.safetyCheckOnly_Tooltip.SetStatus(false); }, Define.UIEvent.PointerExit);
+
+
+        
+        
+        
+        //BindHighlight((int)DepthB_Objects.Wrench,"렌치");
+        GetObject((int)DepthB_Objects.Wrench).BindEvent(() =>
+        {
+            if (Managers.ContentInfo.PlayData.Depth2 == 2 && Managers.ContentInfo.PlayData.Count == 3 &&
+                !_isClickedMap[(int)DepthB_Objects.Wrench])
+            {
+                _isClickedMap[(int)DepthB_Objects.Wrench] = true;
+                currentClickedToolCount++;
+                GetObject((int)DepthB_Objects.Wrench).SetActive(false);
+                
+                contentController.uiChecklist.CheckSingleAndDeactivateColor((int)ToolCheckList.Wrench);
+                contentController.safetyCheckOnly_Tooltip.SetStatus(false);
+            }
+        });
+        GetObject((int)DepthB_Objects.Wrench).BindEvent(() =>
+        {
+            contentController.safetyCheckOnly_Tooltip.SetStatus(true);
+            contentController.safetyCheckOnly_Tooltip.RefreshText(Define.Safety_Wrench);
+        }, Define.UIEvent.PointerEnter);
+        GetObject((int)DepthB_Objects.Wrench).BindEvent(
+            () => { contentController.safetyCheckOnly_Tooltip.SetStatus(false); }, Define.UIEvent.PointerExit);
+    }
+
+    public void DepthB31Init()
+    {
+    }
+
+    
+    /// <summary>
+    /// 아래 애니메이션 재생은 Animation Key Event에서 사용합니다.
+    /// </summary>
+    public void PlayWorkWearIdleAnim() => workwearAnimator.PlayIdleAnim();
+    public void PlayWorkWearFallAnim() => workwearAnimator.PlayFallAnim();
+    public void PlayWorkWearWorkAnim() => workwearAnimator.PlayWorkAnim();
+    public void PlayWorkWearInspectAnim() => workwearAnimator.PlayInspectAnim();
+
+    public void CancelAllAvatarAnim() => workwearAnimator.CancelAllParameter();
+    public void TurnOnAllEquiment()
+    {
+        GetObject((int)DepthB_Objects.ElectronicDriver).SetActive(true);
+        GetObject((int)DepthB_Objects.Multimeter).SetActive(true);
+        GetObject((int)DepthB_Objects.Wrench).SetActive(true);
+        GetObject((int)DepthB_Objects.Stripper).SetActive(true);
+        GetObject((int)DepthB_Objects.PressureCalibrator).SetActive(true);
+    }
+
+
+    /// <summary>
+    ///     장비 선택 관련 변수 초기화
+    /// </summary>
+    public void InitEquipmentSelectionPart()
+    {
+        _isClickedMap = new Dictionary<int, bool>
+        {
+            { (int)DepthB_Objects.ElectronicDriver, false },
+            { (int)DepthB_Objects.Multimeter, false },
+            { (int)DepthB_Objects.Wrench, false },
+            { (int)DepthB_Objects.Stripper, false },
+            { (int)DepthB_Objects.PressureCalibrator, false },
+
+            { (int)DepthB_Objects.OnStorage_Helmet, false },
+            { (int)DepthB_Objects.OnStorage_InsulatedGloves, false },
+            { (int)DepthB_Objects.OnStorage_Earplugs, false },
+            { (int)DepthB_Objects.OnStorage_Mask, false },
+            { (int)DepthB_Objects.OnStorage_ProtectiveGoggles, false },
+            { (int)DepthB_Objects.OnStorage_InsulatedShoes, false },
+            { (int)DepthB_Objects.OnStorage_FlameResistantClothing, false }
+        };
+
+        currentClickedToolCount = 0;
+    }
+
+    protected virtual void SetDepthNum()
+    {
+        Managers.ContentInfo.PlayData.Depth1 = 2;
+        Managers.ContentInfo.PlayData.Depth2 = 1;
+        Managers.ContentInfo.PlayData.Depth3 = 1;
+        Managers.ContentInfo.PlayData.Count = 0;
+    }
+
+    private void InitializeBStates()
+    {
+        if (_sceneStates == null)
+            _sceneStates = new Dictionary<int, ISceneState>
+            {
+                { 2111, new StateB11_1(this) },
+                { 2112, new StateB11_2(this) },
+                { 2113, new StateB11_3(this) },
+                { 2114, new StateB11_4(this) },
+                { 2115, new StateB11_5(this) },
+                { 2116, new StateB11_6(this) },
+                { 2117, new StateB11_7(this) },
+                { 2118, new StateB11_8(this) },
+                { 2119, new StateB11_9(this) },
+                { 21110, new StateB11_10(this) },
+
+                { 2211, new StateB21_1(this) },
+                { 2212, new StateB21_2(this) },
+                { 2213, new StateB21_3(this) },
+                { 2214, new StateB21_4(this) },
+                { 2215, new StateB21_5(this) },
+                { 2216, new StateB21_6(this) },
+                { 2217, new StateB21_7(this) },
+                { 2218, new StateB21_8(this) },
+                { 2219, new StateB21_9(this) },
+                { 22110, new StateB21_10(this) },
+                { 22111, new StateB21_11(this) },
+                { 22112, new StateB21_12(this) },
+
+
+                { 2311, new StateB31_1(this) },
+                { 2312, new StateB31_2(this) },
+                { 2313, new StateB31_3(this) },
+                { 2314, new StateB31_4(this) },
+                { 2315, new StateB31_5(this) },
+                { 2316, new StateB31_6(this) },
+                { 2317, new StateB31_7(this) },
+                { 2318, new StateB31_8(this) },
+                { 2319, new StateB31_9(this) },
+                { 23110, new StateB31_10(this) },
+                { 23111, new StateB31_11(this) },
+                { 23112, new StateB31_12(this) },
+                { 23113, new StateB31_13(this) },
+                { 23114, new StateB31_14(this) },
+                { 23115, new StateB31_15(this) },
+                { 23116, new StateB31_16(this) },
+                { 23117, new StateB31_17(this) }
+            };
+    }
+}
